@@ -42,46 +42,55 @@ namespace SGen
         /// Текстура со спрайтами мира
         /// </summary>
         public static Texture2D Texture;
+        
         /// <summary>
         /// Загрузка карты и графики для неё
         /// </summary>
         /// <param name="MapFile">Файл карты в формате SGMap, создаррая редактором Map Editor</param>
         public static void LoadMap(string MapFile)
         {
-            BinaryReader file = new BinaryReader(new FileStream(MapFile, System.IO.FileMode.Open));
+            M = null;
+            kX = null;
+            kY = null;
+            BinaryReader file = new BinaryReader(new FileStream(MapFile, FileMode.Open));
             file.ReadString();
-            Screen.BlockSize = file.ReadInt32();
-            file.ReadInt32();
-            file.ReadInt32();
+            Screen.BlockSize = file.ReadUInt16();
+            file.ReadUInt16();
+            file.ReadUInt16();
             Layers = file.ReadByte();
             Width = file.ReadUInt16();
             Height = file.ReadUInt16();
-            M = null;
-            M = new ushort[Layers, Width, Height];
-            kX = null;
-            kX = new float[Layers];
-            kY = null;
-            kY = new float[Layers];
+            M = new ushort[Layers + 1, Width, Height];
+            kX = new float[Layers + 1];
+            kY = new float[Layers + 1];
             Main = 0;
             //Загружаем карту
-            for (byte l = 0; l < Layers; l++)
+            for (byte l = 0; l <= Layers; l++)
             {
-                ushort firststring = file.ReadUInt16();
-                ushort laststring = file.ReadUInt16();
-                for (int i = firststring; i <= laststring; i++)
+                file.ReadString();
+                bool OK = true;
+                do
                 {
-                    ushort firstrow = file.ReadUInt16();
-                    ushort lasttrow = file.ReadUInt16();
-                    for (int j = firstrow; j <= lasttrow; j++)
+                    int j = file.ReadUInt16();
+                    if (j != 0xFFFF)
                     {
-                        M[l, j, i] = file.ReadUInt16();
+                        int FirstBlock = file.ReadUInt16();
+                        int LastBlock = file.ReadUInt16();
+                        for (int i = FirstBlock; i <= LastBlock; i++) M[l, i, j] = file.ReadUInt16();
                     }
-                }
+                    else OK = false;
+                } while (OK);
                 kX[l] = file.ReadSingle();
                 kY[l] = file.ReadSingle();
                 //Устанавливаем главный слой, если коэффициенты равны 1
                 if (kX[l] == 1 & kY[l] == 1 & Main == 0) Main = l;
             }
+            //Загружаем правила анимации
+            file.ReadString();
+            //Правила анимации
+            int count = file.ReadInt32();
+            for (int i = 0; i < count; i++)
+                MapAnimation.List.Add(new MapAnimation(file.ReadUInt16(), file.ReadByte(), file.ReadByte(), (MapAnimation.Types)file.ReadByte()));
             file.Close();
             //Подготавливаем лимиты движения камеры
             Screen.SetLimits(Width, Height);

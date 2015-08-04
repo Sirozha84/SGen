@@ -115,6 +115,8 @@ namespace SGen
             if (Camera.Y < 0) Camera.Y = 0;
             if (Camera.X > RightLimit) Camera.X = RightLimit;
             if (Camera.Y > BottomLimit) Camera.Y = BottomLimit;
+            //Обрабатываем анимацию
+            foreach (MapAnimation anim in MapAnimation.List) anim.Action();
         }
         /// <summary>
         /// Рисование карты
@@ -126,10 +128,10 @@ namespace SGen
             //Решаем какие слои рисовать
             int StartLayer = 1;
             int LastLayer = Map.Layers;
-            if (drawmode == DrawMode.Back) LastLayer = Map.Main + 1;
+            if (drawmode == DrawMode.Back) LastLayer = Map.Main;
             if (drawmode == DrawMode.Front) StartLayer = Map.Main + 1;
             //Рисуем
-            for (int l = StartLayer; l < LastLayer; l++)
+            for (int l = StartLayer; l <= LastLayer; l++)
             {
                 //Считаем участок в матрице для вывода на экран
                 int i1 = (int)(Camera.X / BlockSize * (Map.kX[l]));
@@ -154,6 +156,10 @@ namespace SGen
         /// <param name = "texture">Текстура</param>
         internal static Rectangle RectByNum(int num, Texture2D texture)
         {
+            //Если на код привязана анимация, изменяем номер блока
+            int index = MapAnimation.List.FindIndex(anim => anim.Included(num));
+            if (index >= 0) num = MapAnimation.List[index].GetFrame(num);
+            //Ищем блок на текстуре
             int count = texture.Width / BlockSize;
             return new Rectangle(
                 (num % count) * BlockSize,
