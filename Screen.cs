@@ -95,9 +95,9 @@ namespace SGen
         /// Ускорение используется по умолчанию.
         /// </summary>
         /// <param name="position">Точка слежения камеры</param>
-        public static void Action(Vector2 position)
+        public static void Update(Vector2 position)
         {
-            Action(position, 0.02f);
+            Update(position, 0.02f);
         }
         /// <summary>
         /// Обновление позиции камеры, движущейся с ускорением к позиции, с которой
@@ -105,7 +105,7 @@ namespace SGen
         /// </summary>
         /// <param name="position">Точка слежения камеры</param>
         /// <param name="a">Ускорение движения, 0.02F - ускорение по умолчанию.</param>
-        public static void Action(Vector2 position, float a)
+        public static void Update(Vector2 position, float a)
         {
             //Движем камеру к точке
             Camera.X += (position.X - CenterX - Camera.X) * a;
@@ -176,6 +176,18 @@ namespace SGen
             BottomMapPixel = height * BlockSize - 1;
             RightLimit = width * BlockSize - Width;
             BottomLimit = height * BlockSize - Height;
+        }
+
+        /// <summary>
+        /// Рисование сцены игры (задник, объекты, передник)
+        /// </summary>
+        public static void Draw()
+        {
+            spriteBatch.Begin();
+            Draw(DrawMode.Back);
+            Engine.Objects.ForEach(o => o.Draw());
+            Draw(DrawMode.Front);
+            spriteBatch.End();
         }
     }
 }

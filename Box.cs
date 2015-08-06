@@ -11,7 +11,7 @@ namespace SGen
     /// Так же класс содержит и статичные параметры игры (ускорение свободного падения).
     /// </summary>
     /// 
-    public class Box
+    public abstract class Box
     {
 
         #region Базовые константы для всех объектов, задаются при запуске игры
@@ -39,6 +39,10 @@ namespace SGen
 
         #region Базовые константы задающиеся в конструкторе конкретного объекта
         /// <summary>
+        /// Код объекта
+        /// </summary>
+        int Code;
+        /// <summary>
         /// Размеры спрайта (ширина)
         /// </summary>
         int Width;
@@ -57,7 +61,7 @@ namespace SGen
         /// <summary>
         /// Упирается ли объект в стены
         /// </summary>
-        bool Collision;
+        bool Hard;
         /// <summary>
         /// Может ли объект стоять на платформах
         /// </summary>
@@ -71,6 +75,8 @@ namespace SGen
         /// Коэффициент отскока от 0 до 1.
         /// </summary>
         float Rebound;
+
+        bool TestCollisions;
         #endregion
 
         #region Рабочие переменные
@@ -106,6 +112,29 @@ namespace SGen
         /// Флаг движения в последний кадр
         /// </summary>
         bool ControlMove = false;
+        /// <summary>
+        /// True, если объект надо уничтожить
+        /// </summary>
+        public bool Destroyed = false;
+        #endregion
+
+        #region Абстрактные методы
+        /// <summary>
+        /// Обновление объекта
+        /// </summary>
+        /// <returns></returns>
+        public abstract void Update();
+
+        /// <summary>
+        /// Рисование объекта
+        /// </summary>
+        public abstract void Draw();
+
+        /// <summary>
+        /// Действие при коллизиях с указанным объекта
+        /// </summary>
+        /// <param name="box">Объект, с которым произошло столкновение</param>
+        public abstract void Collision(Box box);
         #endregion
 
         /// <summary>
@@ -120,11 +149,12 @@ namespace SGen
             Height = 0;
             Side = 0;
             Top = 0;
-            Collision = false;
+            Hard = false;
             DownIntoPlatform = false;
             Weight = 0;
             Rebound = 0;
-        }       
+            TestCollisions = false;
+        }
         /// <summary>
         /// Конструктор игрового объекта, не имеющего веса и проверку на столкновения
         /// </summary>
@@ -141,7 +171,7 @@ namespace SGen
             Side = side;
             Top = top;
             //Остальные задаются в продвинутом конструкторе, здесь же выставляются дефолтные
-            Collision = false;
+            Hard = false;
             DownIntoPlatform = false;
             Weight = 0;
             Rebound = 0;
@@ -155,12 +185,12 @@ namespace SGen
         /// <param name = "height">Высота объекта</param>
         /// <param name = "side">Расстояния по бокам до чувствительных зон</param>
         /// <param name = "top">Расстояние сверху до чувствительной зоны</param>
-        /// <param name = "collision">Проверять ли на столкновения при передвижении</param>
-        /// <param name = "weight">имеет ли объект вес</param>
+        /// <param name = "hard">Проверять ли на столкновения</param>
+        /// <param name = "weight">Вес объекта, 0 - если невесомый</param>
         /// <param name = "downIntoPlatform">Проходит ли вниз через платформы</param>
         /// <param name = "rebound">Коэффициент отскока от 0 до 1</param>
         public Box(Vector2 position, int width, int height, int side, int top,
-            bool collision, bool downIntoPlatform, float weight, float rebound)
+            bool hard, bool downIntoPlatform, float weight, float rebound)
         {
             Position = position;
             Width = width;
@@ -168,7 +198,7 @@ namespace SGen
             Side = side;
             Top = top;
             //Продвинутые переменные
-            Collision = collision;
+            Hard = hard;
             DownIntoPlatform = downIntoPlatform;
             Weight = weight;
             Rebound = rebound;
@@ -208,7 +238,7 @@ namespace SGen
         bool MoveX(int Delta)
         {
             //Подготавливаем начальные переменные
-            if (!Collision)
+            if (!Hard)
             {
                 Position.X += Delta;
                 return true;
@@ -243,7 +273,7 @@ namespace SGen
         bool MoveY(int Delta)
         {
             //Подготавливаем начальные переменные
-            if (!Collision)
+            if (!Hard)
             {
                 Position.Y += Delta;
                 return true;
@@ -279,33 +309,19 @@ namespace SGen
         bool CheckPoint(int x, int y, int dy)
         {
             //Проверим, не проверяется ли точка вне матрицы
-            if (x < 0 | y < 0 | x > Screen.RightMapPixelPixel | y > Screen.BottomMapPixel)
-            {
-                return true;
-            }
+            if (x < 0 | y < 0 | x > Screen.RightMapPixelPixel | y > Screen.BottomMapPixel) return true;
             int dot = Map.M[0, x / Screen.BlockSize, y / Screen.BlockSize];
             //Сначала проверим не преграждаем ли путь платформа
             if (DownIntoPlatform && dy > 0)
             {
-                //Надо проверить не находится ли точка в самом верху(только если так - тогда платформа
-                //не даёт упасть
-                if ((y) % Screen.BlockSize == 0)
-                {
-                    //System.Windows.Forms.MessageBox.Show("Вниз");
-                    foreach (int b in HardsDown)
-                    {
-                        if (dot == b) return false;
-                    }
-                }
+                //Надо проверить не находится ли точка в самом верху
+                //(только если так - тогда платформане даёт упасть)
+                if ((y) % Screen.BlockSize == 0) foreach (int b in HardsDown) if (dot == b) return false;
             }
             //Платформа не помешала - двигаемся дальше
-            foreach (int b in Hards)
-            {
-                if (dot == b) return false;
-            }
+            foreach (int b in Hards) if (dot == b) return false;
             return true;
         }
-
 
         /// <summary>
         /// Команда: иди влево
@@ -316,6 +332,7 @@ namespace SGen
             if (Speed.X < -MaxSpeed) Speed.X = -MaxSpeed;
             ControlMove = true;
         }
+        
         /// <summary>
         /// Команда: иди вправо
         /// </summary>
@@ -325,14 +342,15 @@ namespace SGen
             if (Speed.X > MaxSpeed) Speed.X = MaxSpeed;
             ControlMove = true;
         }
+
         /// <summary>
         /// Команда: прыгай
         /// </summary>
         public void Jump()
         {
             Speed.Y = -JumpSpeed;
-
         }
+
         /// <summary>
         /// Задание импульса с заданным углом направления и силой
         /// </summary>
@@ -343,6 +361,7 @@ namespace SGen
             Speed.X = (float)Math.Cos(angle) * stronge;
             Speed.Y = -(float)Math.Sin(angle) * stronge;
         }
+        
         /// <summary>
         /// Задание импульса с заданным углом направления и силой
         /// </summary>
@@ -354,6 +373,7 @@ namespace SGen
             Speed.X = (float)Math.Sin(Angle) * stronge;
             Speed.Y = -(float)Math.Cos(Angle) * stronge;
         }
+        
         /// <summary>
         /// Задание импульса с явным указанием скоростей по X и Y
         /// </summary>
@@ -362,11 +382,12 @@ namespace SGen
         {
             Speed = to;
         }
+        
         /// <summary>
-        /// Свободное перемещение в пространстве с учётом гравитации.
+        /// Обработка физики.
         /// Вызывается каждый кадр когда объект находится в свободном падении.
         /// </summary>
-        public void FreeMove()
+        public void Physics()
         {
             PositionFake = Position; 
             if (Weight>0) Speed.Y += Gravitation;
@@ -409,6 +430,7 @@ namespace SGen
             }
             ControlMove = false;
         }
+        
         /// <summary>
         /// Возвращает true, если объект вылетел за карту на указанное по умолчанию расстояние
         /// </summary>
@@ -417,6 +439,7 @@ namespace SGen
         {
             return Out(OutLength);
         }
+        
         /// <summary>
         /// Возвращает true, если объект вылетел за карту на указанное расстояние
         /// </summary>
@@ -431,15 +454,23 @@ namespace SGen
             return false;
         }
 
-        public bool TestCollision(Box CompareObject)
+        /// <summary>
+        /// Проверка на коллиюию с указанным объектом
+        /// </summary>
+        /// <param name="CompareObject">Проверяемый объект</param>
+        /// <returns></returns>
+        public void TestCollision(Box CompareObject)
         {
-            //BoundingBox oo1 = new BoundingBox(new Vector3(
+            if (this == CompareObject) return;
             Rectangle o1 = new Rectangle((int)Position.X + Side, (int)Position.Y + Top, Width - Side * 2, Height - Top);
             Rectangle o2 = new Rectangle((int)CompareObject.Position.X + CompareObject.Side, (int)CompareObject.Position.Y + CompareObject.Top,
                 CompareObject.Width - CompareObject.Side * 2, CompareObject.Height - CompareObject.Top);
-            return o1.Intersects(o2);
-            // Console.WriteLine(o1.X);
-            
+            if (o1.Intersects(o2)) Collision(CompareObject);
+        }
+
+        public void Destroy()
+        {
+            Destroyed = true;
         }
     }
 }
