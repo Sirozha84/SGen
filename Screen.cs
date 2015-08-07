@@ -57,11 +57,15 @@ namespace SGen
         /// <summary>
         /// Ширина экрана в блоках (нужна для рисования мира)
         /// </summary>
-        private static int WidthInBlocks;
+        static int WidthInBlocks;
         /// <summary>
         /// Высота экрана в блоках (нужна для рисования мира)
         /// </summary>
-        private static int HeightInBlocks;
+        static int HeightInBlocks;
+        /// <summary>
+        /// Объект слежения камеры
+        /// </summary>
+        static Box trackingobject;
         #endregion
 
         #region Рабочие переменные
@@ -90,18 +94,35 @@ namespace SGen
             WidthInBlocks = Width / BlockSize + 2;
             HeightInBlocks = Height / BlockSize + 2;
         }
+
         /// <summary>
-        /// Движение камеры у указанной точке. Точка находится в центре экрана.
-        /// Ускорение используется по умолчанию.
+        /// Установка объекта слежения камеры и установка первоначальной позиции камеры
+        /// </summary>
+        /// <param name="obj"></param>
+        public static void SetTrackingObject(Box obj)
+        {
+            trackingobject = obj;
+        }
+
+        /// <summary>
+        /// Движение камеры к объекту по умолчанию с ускорением по умолчанию
+        /// </summary>
+        public static void Update()
+        {
+            Update(trackingobject.Center(), 0.02f);
+        }
+
+        /// <summary>
+        /// Движение камеры к указанной точке с ускорением по умолчанию
         /// </summary>
         /// <param name="position">Точка слежения камеры</param>
         public static void Update(Vector2 position)
         {
             Update(position, 0.02f);
         }
+
         /// <summary>
-        /// Обновление позиции камеры, движущейся с ускорением к позиции, с которой
-        /// указанная точка показывается в центре экрана.
+        /// Движение камеры к указанной точке с указанным ускорением
         /// </summary>
         /// <param name="position">Точка слежения камеры</param>
         /// <param name="a">Ускорение движения, 0.02F - ускорение по умолчанию.</param>
@@ -111,10 +132,10 @@ namespace SGen
             Camera.X += (position.X - CenterX - Camera.X) * a;
             Camera.Y += (position.Y - CenterY - Camera.Y) * a;
             //Корректируем движение чтоб камера не вылетала за пределы карты
-            if (Camera.X < 0) Camera.X = 0;
-            if (Camera.Y < 0) Camera.Y = 0;
             if (Camera.X > RightLimit) Camera.X = RightLimit;
             if (Camera.Y > BottomLimit) Camera.Y = BottomLimit;
+            if (Camera.X < 0) Camera.X = 0;
+            if (Camera.Y < 0) Camera.Y = 0;
             //Обрабатываем анимацию
             foreach (MapAnimation anim in MapAnimation.List) anim.Action();
         }

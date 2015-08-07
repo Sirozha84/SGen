@@ -18,7 +18,7 @@ namespace SGen
             Objects.ForEach(o =>
             {
                 o.Update();
-                Objects.ForEach(s => o.TestCollision(s));
+                if (o.CollisionTests) Objects.ForEach(s => o.CollisionTest(s));
             });
             //Уничтожение всех вылетевших за предел экрана или уничтоженных объектов
             Objects.RemoveAll(o => o.Out() | o.Destroyed);

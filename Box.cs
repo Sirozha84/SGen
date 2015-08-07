@@ -13,7 +13,6 @@ namespace SGen
     /// 
     public abstract class Box
     {
-
         #region Базовые константы для всех объектов, задаются при запуске игры
         /// <summary>
         /// spriteBatch
@@ -26,11 +25,11 @@ namespace SGen
         /// <summary>
         /// Список блоков не пускающих по всем направлениям
         /// </summary>
-        public static int[] Hards;
+        public static int[] Hards = new int[0];
         /// <summary>
         /// Список блоков, не пускающих вниз (Платформы на которые можно запрыгнуть снизу)
         /// </summary>
-        public static int[] HardsDown;
+        public static int[] HardsDown = new int[0];
         /// <summary>
         /// Расстояние вылета за пределы карты, уничтожающее объект
         /// </summary>
@@ -38,10 +37,10 @@ namespace SGen
         #endregion
 
         #region Базовые константы задающиеся в конструкторе конкретного объекта
-        /// <summary>
-        /// Код объекта
+        /*/// <summary>
+        /// Код объекта, используется при 
         /// </summary>
-        int Code;
+        public int Code;*/
         /// <summary>
         /// Размеры спрайта (ширина)
         /// </summary>
@@ -75,8 +74,10 @@ namespace SGen
         /// Коэффициент отскока от 0 до 1.
         /// </summary>
         float Rebound;
-
-        bool TestCollisions;
+        /// <summary>
+        /// 
+        /// </summary>
+        public bool CollisionTests;
         #endregion
 
         #region Рабочие переменные
@@ -149,11 +150,11 @@ namespace SGen
             Height = 0;
             Side = 0;
             Top = 0;
+            CollisionTests = false;
             Hard = false;
             DownIntoPlatform = false;
             Weight = 0;
             Rebound = 0;
-            TestCollisions = false;
         }
         /// <summary>
         /// Конструктор игрового объекта, не имеющего веса и проверку на столкновения
@@ -163,13 +164,15 @@ namespace SGen
         /// <param name = "height">Высота объекта</param>
         /// <param name = "side">Расстояния по бокам до чувствительных зон</param>
         /// <param name = "top">Расстояние сверху до чувствительной зоны</param>
-        public Box(Vector2 position, int width, int height, int side, int top)
+        /// <param name = "collision">Реагирует ли объект на прикосновения других</param>
+        public Box(Vector2 position, int width, int height, int side, int top, bool collision)
         {
             Position = position;
             Width = width;
             Height = height;
             Side = side;
             Top = top;
+            CollisionTests = collision;
             //Остальные задаются в продвинутом конструкторе, здесь же выставляются дефолтные
             Hard = false;
             DownIntoPlatform = false;
@@ -185,11 +188,12 @@ namespace SGen
         /// <param name = "height">Высота объекта</param>
         /// <param name = "side">Расстояния по бокам до чувствительных зон</param>
         /// <param name = "top">Расстояние сверху до чувствительной зоны</param>
+        /// <param name = "collision">Реагирует ли объект на прикосновения других</param>
         /// <param name = "hard">Проверять ли на столкновения</param>
         /// <param name = "weight">Вес объекта, 0 - если невесомый</param>
         /// <param name = "downIntoPlatform">Проходит ли вниз через платформы</param>
         /// <param name = "rebound">Коэффициент отскока от 0 до 1</param>
-        public Box(Vector2 position, int width, int height, int side, int top,
+        public Box(Vector2 position, int width, int height, int side, int top, bool collision,
             bool hard, bool downIntoPlatform, float weight, float rebound)
         {
             Position = position;
@@ -197,6 +201,7 @@ namespace SGen
             Height = height;
             Side = side;
             Top = top;
+            CollisionTests = collision;
             //Продвинутые переменные
             Hard = hard;
             DownIntoPlatform = downIntoPlatform;
@@ -396,7 +401,7 @@ namespace SGen
             if (Speed.Y > MaxFallSpeed) Speed.Y = MaxFallSpeed;
             int x = (int)PositionFake.X - (int)Position.X; //Хрен знает как оно работает, вовремя не прокоментировал,
             int y = (int)PositionFake.Y - (int)Position.Y; //Теперь "это" лучше не трогать!
-            //Если достигли стены, считаем уровень отскока
+            //Отскок от стен
             if (x != 0)
             {
                 if (!MoveX(x))
@@ -405,13 +410,13 @@ namespace SGen
                     if (Speed.X >= -1 & Speed.X <= 1) Speed.X = 0;
                 }
             }
+            //Отскок от пола или потолка
             if (y != 0)
             {
                 if (!MoveY(y))
                 {
-                    Speed.Y = -(int)(Speed.Y * Rebound-1);         //Намешал конечно кучу лишнего
-                    if (Speed.Y >= -1 & Speed.Y <= 1) Speed.Y = Speed.Y / 2; //но без этого отскок не останавливается...
-                    // (Speed.Y >= -1 & Speed.Y <= 1) Speed.Y = 0; <- а так было до того как Миша доебался ))
+                    Speed.Y = -(int)(Speed.Y * Rebound - 1);
+                    if (Speed.Y >= -1 & Speed.Y <= 1) Speed.Y = Speed.Y / 2;
                 }
             }
             //Замедляемся, если небыло управления
@@ -420,12 +425,12 @@ namespace SGen
                 if (Speed.X < 0)
                 {
                     Speed.X += Weight;
-                    if (Speed.X > 0) Speed.X = 0; //Чтоб замедление не перескочило 0
+                    if (Speed.X > 0) Speed.X = 0;
                 }
                 if (Speed.X > 0)
                 {
                     Speed.X -= Weight;
-                    if (Speed.X < 0) Speed.X = 0; //Чтоб замедление не перескочило 0
+                    if (Speed.X < 0) Speed.X = 0;
                 }
             }
             ControlMove = false;
@@ -459,9 +464,9 @@ namespace SGen
         /// </summary>
         /// <param name="CompareObject">Проверяемый объект</param>
         /// <returns></returns>
-        public void TestCollision(Box CompareObject)
+        public void CollisionTest(Box CompareObject)
         {
-            if (this == CompareObject) return;
+            if (this == CompareObject | !CollisionTests) return;
             Rectangle o1 = new Rectangle((int)Position.X + Side, (int)Position.Y + Top, Width - Side * 2, Height - Top);
             Rectangle o2 = new Rectangle((int)CompareObject.Position.X + CompareObject.Side, (int)CompareObject.Position.Y + CompareObject.Top,
                 CompareObject.Width - CompareObject.Side * 2, CompareObject.Height - CompareObject.Top);
