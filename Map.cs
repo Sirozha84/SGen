@@ -54,7 +54,7 @@ namespace SGen
             kY = null;
             BinaryReader file = new BinaryReader(new FileStream(MapFile, FileMode.Open));
             file.ReadString();
-            Screen.BlockSize = file.ReadUInt16();
+            Screen.TileSize = file.ReadUInt16();
             file.ReadUInt16();
             file.ReadUInt16();
             Layers = file.ReadByte();

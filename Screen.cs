@@ -27,9 +27,16 @@ namespace SGen
         /// </summary>
         private static int Height;
         /// <summary>
-        /// Размер блока
+        /// Размер тайла
         /// </summary>
-        public static int BlockSize;
+        public static int TileSize;
+        /// <summary>
+        /// Размер пикселя (для пиксель-арт игр) для округления движения камеры, 0 или 1 - если стандартный размер
+        /// </summary>
+        public static int PixelSize;
+        #endregion
+
+        #region Рабочие переменные
         /// <summary>
         /// Индекс самого правого пикселя мира
         /// </summary>
@@ -66,9 +73,6 @@ namespace SGen
         /// Объект слежения камеры
         /// </summary>
         static Box trackingobject;
-        #endregion
-
-        #region Рабочие переменные
         /// <summary>
         /// Положение камеры (центр)
         /// </summary>
@@ -81,18 +85,20 @@ namespace SGen
         /// <param name="graphics">GraphicsDeviceManager</param>
         /// <param name="width">Ширина экрана</param>
         /// <param name="height">Высота экрана</param>
-        public static void Set(GraphicsDeviceManager graphics, int width, int height, int blocksize)
+        public static void Set(GraphicsDeviceManager graphics, int width, int height, int blocksize, int pixelsize)
         {
             Width = width;
             Height = height;
-            BlockSize = blocksize;
+            TileSize = blocksize;
             graphics.PreferredBackBufferWidth = Width;
             graphics.PreferredBackBufferHeight = Height;
             graphics.ApplyChanges();
             CenterX = Width / 2;
             CenterY = Height / 2;
-            WidthInBlocks = Width / BlockSize + 2;
-            HeightInBlocks = Height / BlockSize + 2;
+            WidthInBlocks = Width / TileSize + 2;
+            HeightInBlocks = Height / TileSize + 2;
+            PixelSize = pixelsize;
+            if (PixelSize < 1) PixelSize = 1;
         }
 
         /// <summary>
@@ -155,16 +161,16 @@ namespace SGen
             for (int l = StartLayer; l <= LastLayer; l++)
             {
                 //Считаем участок в матрице для вывода на экран
-                int i1 = (int)(Camera.X / BlockSize * (Map.kX[l]));
-                int j1 = (int)(Camera.Y / BlockSize * (Map.kY[l]));
+                int i1 = (int)(Camera.X / TileSize * (Map.kX[l]));
+                int j1 = (int)(Camera.Y / TileSize * (Map.kY[l]));
                 for (int i = i1; i < i1 + WidthInBlocks; i++)
                 {
                     for (int j = j1; j < j1 + HeightInBlocks; j++)
                     {
                         if (i >= 0 & i < Map.Width & j >= 0 & j < Map.Height && Map.M[l, i, j] != 0)
                             spriteBatch.Draw(Map.Texture,
-                                new Vector2((int)(i * BlockSize - Map.kX[l] * Camera.X+BlockSize)-BlockSize,
-                                (int)(j * BlockSize - Map.kY[l] * Camera.Y + BlockSize) - BlockSize),
+                                new Vector2(i * TileSize - (int)(Map.kX[l] * Camera.X / PixelSize) * PixelSize,
+                                j * TileSize - (int)(Map.kY[l] * Camera.Y / PixelSize) * PixelSize),
                                 RectByNum(Map.M[l, i, j], Map.Texture), Color.White);
                     }
                 }
@@ -181,10 +187,10 @@ namespace SGen
             int index = MapAnimation.List.FindIndex(anim => anim.Included(num));
             if (index >= 0) num = MapAnimation.List[index].GetFrame(num);
             //Ищем блок на текстуре
-            int count = texture.Width / BlockSize;
+            int count = texture.Width / TileSize;
             return new Rectangle(
-                (num % count) * BlockSize,
-                (num / count) * BlockSize, BlockSize, BlockSize);
+                (num % count) * TileSize,
+                (num / count) * TileSize, TileSize, TileSize);
         }
         /// <summaru>
         /// Установка лимитов на движение камеры
@@ -193,10 +199,10 @@ namespace SGen
         /// <param name = "height">Количество блоков по вертикали</param>
         internal static void SetLimits(int width, int height)
         {
-            RightMapPixelPixel = width * BlockSize - 1;
-            BottomMapPixel = height * BlockSize - 1;
-            RightLimit = width * BlockSize - Width;
-            BottomLimit = height * BlockSize - Height;
+            RightMapPixelPixel = width * TileSize - 1;
+            BottomMapPixel = height * TileSize - 1;
+            RightLimit = width * TileSize - Width;
+            BottomLimit = height * TileSize - Height;
         }
 
         /// <summary>

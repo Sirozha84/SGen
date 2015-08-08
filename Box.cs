@@ -230,10 +230,11 @@ namespace SGen
             SpriteEffects effect = SpriteEffects.None;
             if (pos < 0) effect = SpriteEffects.FlipHorizontally;
             spriteBatch.Draw(texture,
-                new Rectangle((int)(Position.X - Screen.Camera.X), (int)(Position.Y - Screen.Camera.Y), Width, Height),
-                new Rectangle(numKd * Width, numAn * Height, Width, Height),
+                new Rectangle(
+                    (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(Screen.Camera.X/Screen.PixelSize)*Screen.PixelSize,
+                    (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(Screen.Camera.Y/Screen.PixelSize)*Screen.PixelSize,
+                    Width, Height), new Rectangle(numKd * Width, numAn * Height, Width, Height),
                 Color.White, 0, new Vector2(0, 0), effect, 0);
-            
         }
 
         /// <summary>
@@ -260,7 +261,7 @@ namespace SGen
             for (int i = 0; i < Delta; i++)
             {
 
-                for (int y = (int)Position.Y + Top; y < Position.Y + Height; y += Screen.BlockSize)
+                for (int y = (int)Position.Y + Top; y < Position.Y + Height; y += Screen.TileSize)
                 {
                     if (!CheckPoint(x, y, 0)) return false;
                 }
@@ -295,7 +296,7 @@ namespace SGen
             for (int i = 0; i < Delta; i++)
             {
 
-                for (int x = (int)Position.X + Side; x < Position.X + Width - Side; x += Screen.BlockSize)
+                for (int x = (int)Position.X + Side; x < Position.X + Width - Side; x += Screen.TileSize)
                 {
                     if (!CheckPoint(x, y, d)) return false;
                 }
@@ -315,13 +316,13 @@ namespace SGen
         {
             //Проверим, не проверяется ли точка вне матрицы
             if (x < 0 | y < 0 | x > Screen.RightMapPixelPixel | y > Screen.BottomMapPixel) return true;
-            int dot = Map.M[0, x / Screen.BlockSize, y / Screen.BlockSize];
+            int dot = Map.M[0, x / Screen.TileSize, y / Screen.TileSize];
             //Сначала проверим не преграждаем ли путь платформа
             if (DownIntoPlatform && dy > 0)
             {
                 //Надо проверить не находится ли точка в самом верху
                 //(только если так - тогда платформане даёт упасть)
-                if ((y) % Screen.BlockSize == 0) foreach (int b in HardsDown) if (dot == b) return false;
+                if ((y) % Screen.TileSize == 0) foreach (int b in HardsDown) if (dot == b) return false;
             }
             //Платформа не помешала - двигаемся дальше
             foreach (int b in Hards) if (dot == b) return false;
