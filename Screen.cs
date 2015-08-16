@@ -48,19 +48,27 @@ namespace SGen
         /// <summary>
         /// Правый предел передвижения камеры
         /// </summary>
-        internal static int RightLimit;
+        internal int RightLimit;
         /// <summary>
         /// Нижник предел передвижения камеры
         /// </summary>
-        internal static int BottomLimit;
+        internal int BottomLimit;
+        /// <summary>
+        /// Смещение по X для задника и передника
+        /// </summary>
+        internal int BackShiftX;
+        /// <summary>
+        /// Смещение по Y для задника и передника
+        /// </summary>
+        internal int BackShiftY;
         /// <summary>
         /// Точка центра камеры по X
         /// </summary>
-        public static int CenterX;
+        public int CenterX;
         /// <summary>
         /// Точка центра камеры по Y
         /// </summary>
-        public static int CenterY;
+        public int CenterY;
         /// <summary>
         /// Ширина экрана в блоках (нужна для рисования мира)
         /// </summary>
@@ -72,11 +80,15 @@ namespace SGen
         /// <summary>
         /// Объект слежения камеры
         /// </summary>
-        static Box trackingobject;
+        Box trackingobject;
         /// <summary>
         /// Положение камеры (центр)
         /// </summary>
-        public static Vector2 Camera = new Vector2();
+        public Vector2 Camera = new Vector2();
+        /// <summary>
+        /// Область рисования
+        /// </summary>
+        Viewport viewport;
         #endregion
 
         /// <summary>
@@ -93,19 +105,35 @@ namespace SGen
             graphics.PreferredBackBufferWidth = Width;
             graphics.PreferredBackBufferHeight = Height;
             graphics.ApplyChanges();
-            CenterX = Width / 2;
-            CenterY = Height / 2;
             WidthInBlocks = Width / TileSize + 2;
             HeightInBlocks = Height / TileSize + 2;
             PixelSize = pixelsize;
             if (PixelSize < 1) PixelSize = 1;
         }
 
+        /// <summaru>
+        /// Конструктор экрана
+        /// </summary>
+        /// <param name = "width">Ширина видимого экрана</param>
+        /// <param name = "height">Высота видимого экрана</param>
+        public Screen(int x, int y, int width, int height)
+        {
+            RightMapPixelPixel = World.Width * TileSize - 1;
+            BottomMapPixel = World.Height * TileSize - 1;
+            RightLimit = World.Width * TileSize - width;
+            BottomLimit = World.Height * TileSize - height;
+            CenterX = width / 2;
+            CenterY = height / 2;
+            viewport = new Viewport(x, y, width, height);
+            BackShiftX = width / 2 - Width / 2;
+            BackShiftY = height / 2 - Height / 2;
+        }
+
         /// <summary>
         /// Установка объекта слежения камеры и установка первоначальной позиции камеры
         /// </summary>
         /// <param name="obj"></param>
-        public static void SetTrackingObject(Box obj)
+        public void SetTrackingObject(Box obj)
         {
             trackingobject = obj;
         }
@@ -113,7 +141,7 @@ namespace SGen
         /// <summary>
         /// Движение камеры к объекту по умолчанию с ускорением по умолчанию
         /// </summary>
-        public static void Update()
+        public void Update()
         {
             Update(trackingobject.Center(), 0.02f);
         }
@@ -122,7 +150,7 @@ namespace SGen
         /// Движение камеры к указанной точке с ускорением по умолчанию
         /// </summary>
         /// <param name="position">Точка слежения камеры</param>
-        public static void Update(Vector2 position)
+        public void Update(Vector2 position)
         {
             Update(position, 0.02f);
         }
@@ -132,7 +160,7 @@ namespace SGen
         /// </summary>
         /// <param name="position">Точка слежения камеры</param>
         /// <param name="a">Ускорение движения, 0.02F - ускорение по умолчанию.</param>
-        public static void Update(Vector2 position, float a)
+        public void Update(Vector2 position, float a)
         {
             //Движем камеру к точке
             Camera.X += (position.X - CenterX - Camera.X) * a;
@@ -150,28 +178,28 @@ namespace SGen
         /// </summary>
         /// <param name="spriteBatch">SpriteBatch</param>
         /// <param name="texture">Texture2D</param>
-        public static void Draw(DrawMode drawmode)
+        public void Draw(DrawMode drawmode)
         {
             //Решаем какие слои рисовать
             int StartLayer = 1;
-            int LastLayer = Map.Layers;
-            if (drawmode == DrawMode.Back) LastLayer = Map.Main;
-            if (drawmode == DrawMode.Front) StartLayer = Map.Main + 1;
+            int LastLayer = World.Layers;
+            if (drawmode == DrawMode.Back) LastLayer = World.Main;
+            if (drawmode == DrawMode.Front) StartLayer = World.Main + 1;
             //Рисуем
             for (int l = StartLayer; l <= LastLayer; l++)
             {
                 //Считаем участок в матрице для вывода на экран
-                int i1 = (int)(Camera.X / TileSize * (Map.kX[l]));
-                int j1 = (int)(Camera.Y / TileSize * (Map.kY[l]));
+                int i1 = (int)(Camera.X / TileSize * (World.kX[l]));
+                int j1 = (int)(Camera.Y / TileSize * (World.kY[l]));
                 for (int i = i1; i < i1 + WidthInBlocks; i++)
                 {
                     for (int j = j1; j < j1 + HeightInBlocks; j++)
                     {
-                        if (i >= 0 & i < Map.Width & j >= 0 & j < Map.Height && Map.M[l, i, j] != 0)
-                            spriteBatch.Draw(Map.Texture,
-                                new Vector2(i * TileSize - (int)(Map.kX[l] * Camera.X / PixelSize) * PixelSize,
-                                j * TileSize - (int)(Map.kY[l] * Camera.Y / PixelSize) * PixelSize),
-                                RectByNum(Map.M[l, i, j], Map.Texture), Color.White);
+                        if (i >= 0 & i < World.Width & j >= 0 & j < World.Height && World.M[l, i, j] != 0)
+                            spriteBatch.Draw(World.Texture,
+                                new Vector2(i * TileSize - (int)(World.kX[l] * Camera.X / PixelSize) * PixelSize,
+                                j * TileSize - (int)(World.kY[l] * Camera.Y / PixelSize) * PixelSize),
+                                RectByNum(World.M[l, i, j], World.Texture), Color.White);
                     }
                 }
             }
@@ -192,28 +220,21 @@ namespace SGen
                 (num % count) * TileSize,
                 (num / count) * TileSize, TileSize, TileSize);
         }
-        /// <summaru>
-        /// Установка лимитов на движение камеры
-        /// </summary>
-        /// <param name = "width">Количество блоков по горизонтали</param>
-        /// <param name = "height">Количество блоков по вертикали</param>
-        internal static void SetLimits(int width, int height)
-        {
-            RightMapPixelPixel = width * TileSize - 1;
-            BottomMapPixel = height * TileSize - 1;
-            RightLimit = width * TileSize - Width;
-            BottomLimit = height * TileSize - Height;
-        }
 
         /// <summary>
         /// Рисование сцены игры (задник, объекты, передник)
         /// </summary>
-        public static void Draw()
+        public void Draw(GraphicsDevice graphics)
         {
+            graphics.Viewport = viewport;
             spriteBatch.Begin();
+            spriteBatch.Draw(World.Background, new Rectangle(BackShiftX, BackShiftY, Width, Height),
+                new Rectangle(0, 0, World.Background.Width, World.Background.Height), Color.White);
             Draw(DrawMode.Back);
-            Engine.Objects.ForEach(o => o.Draw());
+            World.Objects.ForEach(o => o.Draw(this));
             Draw(DrawMode.Front);
+            if (World.Front != null) spriteBatch.Draw(World.Front, new Rectangle(BackShiftX, BackShiftY, Width, Height),
+                new Rectangle(0, 0, World.Front.Width, World.Front.Height), Color.White);
             spriteBatch.End();
         }
     }

@@ -10,7 +10,6 @@ namespace SGen
     /// содержащий базовые методы и свойства, присущие всем элементам игры.
     /// Так же класс содержит и статичные параметры игры (ускорение свободного падения).
     /// </summary>
-    /// 
     public abstract class Box
     {
         #region Базовые константы для всех объектов, задаются при запуске игры
@@ -37,10 +36,6 @@ namespace SGen
         #endregion
 
         #region Базовые константы задающиеся в конструкторе конкретного объекта
-        /*/// <summary>
-        /// Код объекта, используется при 
-        /// </summary>
-        public int Code;*/
         /// <summary>
         /// Размеры спрайта (ширина)
         /// </summary>
@@ -117,6 +112,18 @@ namespace SGen
         /// True, если объект надо уничтожить
         /// </summary>
         public bool Destroyed = false;
+        /// <summary>
+        /// Номер анимации
+        /// </summary>
+        public int AnimationSet = 0;
+        /// <summary>
+        /// Номер кадра
+        /// </summary>
+        public int AnimationFrame = 0;
+        /// <summary>
+        /// Направление (больше 0 - вправо, меньше 0 - влево)
+        /// </summary>
+        public int AnimationSide = 0;
         #endregion
 
         #region Абстрактные методы
@@ -129,7 +136,7 @@ namespace SGen
         /// <summary>
         /// Рисование объекта
         /// </summary>
-        public abstract void Draw();
+        //public abstract void Draw();
 
         /// <summary>
         /// Действие при коллизиях с указанным объекта
@@ -217,6 +224,8 @@ namespace SGen
             return new Vector2(Position.X + Width / 2, Position.Y + (Height + Top) / 2);
         }
 
+        public abstract void Draw(Screen screen);
+
         /// <summary>
         /// Рисование спрайта
         /// </summary>
@@ -225,15 +234,15 @@ namespace SGen
         /// <param name = "numAn">Номер анимации</param>
         /// <param name = "numKd">Номер кадра</param>
         /// <param name = "pos">Направление (+1 - вправо, -1 - влево)</param>
-        protected void Draw(Texture2D texture, int numAn, int numKd, int pos)
+        public void Draw(Texture2D texture, Screen screen) //(Texture2D texture, int numAn, int numKd, int pos, Screen screen)
         {
             SpriteEffects effect = SpriteEffects.None;
-            if (pos < 0) effect = SpriteEffects.FlipHorizontally;
+            if (AnimationSide < 0) effect = SpriteEffects.FlipHorizontally;
             spriteBatch.Draw(texture,
                 new Rectangle(
-                    (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(Screen.Camera.X/Screen.PixelSize)*Screen.PixelSize,
-                    (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(Screen.Camera.Y/Screen.PixelSize)*Screen.PixelSize,
-                    Width, Height), new Rectangle(numKd * Width, numAn * Height, Width, Height),
+                    (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.X / Screen.PixelSize) * Screen.PixelSize,
+                    (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.Y / Screen.PixelSize) * Screen.PixelSize,
+                    Width, Height), new Rectangle(AnimationFrame * Width, AnimationSet * Height, Width, Height),
                 Color.White, 0, new Vector2(0, 0), effect, 0);
         }
 
@@ -316,7 +325,7 @@ namespace SGen
         {
             //Проверим, не проверяется ли точка вне матрицы
             if (x < 0 | y < 0 | x > Screen.RightMapPixelPixel | y > Screen.BottomMapPixel) return true;
-            int dot = Map.M[0, x / Screen.TileSize, y / Screen.TileSize];
+            int dot = World.M[0, x / Screen.TileSize, y / Screen.TileSize];
             //Сначала проверим не преграждаем ли путь платформа
             if (DownIntoPlatform && dy > 0)
             {
