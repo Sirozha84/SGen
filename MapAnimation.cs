@@ -81,7 +81,7 @@ namespace SGen
         /// <summary>
         /// Расчёт текущего кадра анимации. Вызывается на каждый кадр игры.
         /// </summary>
-        public void Action()
+        public void Update()
         {
             if (time++ >= Time)
             {

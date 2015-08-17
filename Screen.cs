@@ -1,4 +1,6 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -112,8 +114,28 @@ namespace SGen
         }
 
         /// <summaru>
-        /// Конструктор экрана
+        /// Конструктор экрана. Размеры устанавливаются на весь экран.
+        /// Делается после загрузки карты (устанавливаются границы для движения камеры).
         /// </summary>
+        public Screen()
+        {
+            RightMapPixelPixel = World.Width * TileSize - 1;
+            BottomMapPixel = World.Height * TileSize - 1;
+            RightLimit = World.Width * TileSize - Width;
+            BottomLimit = World.Height * TileSize - Height;
+            CenterX = Width / 2;
+            CenterY = Height / 2;
+            viewport = new Viewport(0, 0, Width, Height);
+            BackShiftX = 0;
+            BackShiftY = 0;
+        }
+
+        /// <summaru>
+        /// Конструктор экрана, с указанными размерами.
+        /// Делается после загрузки карты (устанавливаются границы для движения камеры).
+        /// </summary>
+        /// <param name = "x">Координата X</param>
+        /// <param name = "y">Координата Y</param>
         /// <param name = "width">Ширина видимого экрана</param>
         /// <param name = "height">Высота видимого экрана</param>
         public Screen(int x, int y, int width, int height)
@@ -170,9 +192,8 @@ namespace SGen
             if (Camera.Y > BottomLimit) Camera.Y = BottomLimit;
             if (Camera.X < 0) Camera.X = 0;
             if (Camera.Y < 0) Camera.Y = 0;
-            //Обрабатываем анимацию
-            foreach (MapAnimation anim in MapAnimation.List) anim.Action();
         }
+
         /// <summary>
         /// Рисование карты
         /// </summary>

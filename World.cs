@@ -165,6 +165,8 @@ namespace SGen
             });
             //Уничтожение всех вылетевших за предел экрана или уничтоженных объектов
             Objects.RemoveAll(o => o.Out() | o.Destroyed);
+            //Обработка анимации
+            foreach (MapAnimation anim in MapAnimation.List) anim.Update();
         }
 
         /// <summary>
