@@ -148,10 +148,11 @@ namespace SGen
         /// <summary>
         /// Конструктор аморфного объекта, не имеющего параметров кроме координаты
         /// </summary>
-        /// <param name="position"></param>
-        public Box(Vector2 position)
+        /// <param name = "x">X-координата</param>
+        /// <param name = "y">Y-координата</param>
+        public Box(int x, int y)
         {
-            Position = position;
+            Position = new Vector2(x, y);
             //Остальное и не надо
             Width = 0;
             Height = 0;
@@ -166,15 +167,16 @@ namespace SGen
         /// <summary>
         /// Конструктор игрового объекта, не имеющего веса и проверку на столкновения
         /// </summary>
-        /// <param name = "position">Позиция объекта</param>
+        /// <param name = "x">X-координата</param>
+        /// <param name = "y">Y-координата</param>
         /// <param name = "width">Ширина объекта</param>
         /// <param name = "height">Высота объекта</param>
         /// <param name = "side">Расстояния по бокам до чувствительных зон</param>
         /// <param name = "top">Расстояние сверху до чувствительной зоны</param>
         /// <param name = "collision">Реагирует ли объект на прикосновения других</param>
-        public Box(Vector2 position, int width, int height, int side, int top, bool collision)
+        public Box(int x, int y, int width, int height, int side, int top, bool collision)
         {
-            Position = position;
+            Position = new Vector2(x, y);
             Width = width;
             Height = height;
             Side = side;
@@ -190,7 +192,8 @@ namespace SGen
         /// <summary>
         /// Конструктор игрового объекта, умеющего перемещаться в игровом мире
         /// </summary>
-        /// <param name = "position">Позиция объекта</param>
+        /// <param name = "x">X-координата</param>
+        /// <param name = "y">Y-координата</param>
         /// <param name = "width">Ширина объекта</param>
         /// <param name = "height">Высота объекта</param>
         /// <param name = "side">Расстояния по бокам до чувствительных зон</param>
@@ -200,10 +203,10 @@ namespace SGen
         /// <param name = "weight">Вес объекта, 0 - если невесомый</param>
         /// <param name = "downIntoPlatform">Проходит ли вниз через платформы</param>
         /// <param name = "rebound">Коэффициент отскока от 0 до 1</param>
-        public Box(Vector2 position, int width, int height, int side, int top, bool collision,
+        public Box(int x, int y, int width, int height, int side, int top, bool collision,
             bool hard, bool downIntoPlatform, float weight, float rebound)
         {
-            Position = position;
+            Position = new Vector2(x, y);
             Width = width;
             Height = height;
             Side = side;

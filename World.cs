@@ -60,13 +60,13 @@ namespace SGen
         /// Загрузка карты и графики для неё
         /// </summary>
         /// <param name="MapFile">Файл карты в формате SGMap, создаррая редактором Map Editor</param>
-        public static void LoadMap(string MapFile, Game game)
+        public World(string MapFile, Game game)
         {
-            
+            //string mapFile = game.Content.RootDirectory + MapFile + ".map";
             M = null;
             kX = null;
             kY = null;
-            BinaryReader file = new BinaryReader(new FileStream(MapFile, FileMode.Open));
+            BinaryReader file = new BinaryReader(new FileStream(game.Content.RootDirectory + "\\" + MapFile + ".map", FileMode.Open));
             file.ReadString();
             Screen.TileSize = file.ReadUInt16();
             file.ReadUInt16();
@@ -150,6 +150,14 @@ namespace SGen
             for (int i = 0; i < count; i++)
                 MapAnimation.List.Add(new MapAnimation(file.ReadUInt16(), file.ReadByte(), file.ReadByte(), (MapAnimation.Types)file.ReadByte()));
             file.Close();
+            //Просмотр карты и создание объектов
+            for (int i = 0; i < Width; i++)
+                for (int j = 0; j < Height; j++)
+                    if (M[0, i, j] > 0)
+                    {
+                        Box o = AddObject(M[0, i, j], i * Screen.TileSize, j * Screen.TileSize);
+                        if (o != null) Objects.Add(o);
+                    }
         }
 
         /// <summary>
@@ -175,6 +183,6 @@ namespace SGen
         /// <param name="code"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        abstract public void AddObject(ushort code, int x, int y);
+        abstract public Box AddObject(ushort code, int x, int y);
     }
 }

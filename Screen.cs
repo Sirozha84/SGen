@@ -82,7 +82,7 @@ namespace SGen
         /// <summary>
         /// Объект слежения камеры
         /// </summary>
-        Box trackingobject;
+        Box TrackingObject;
         /// <summary>
         /// Положение камеры (центр)
         /// </summary>
@@ -117,8 +117,9 @@ namespace SGen
         /// Конструктор экрана. Размеры устанавливаются на весь экран.
         /// Делается после загрузки карты (устанавливаются границы для движения камеры).
         /// </summary>
-        public Screen()
+        public Screen(Box trackingObject)
         {
+            TrackingObject = trackingObject;
             RightMapPixelPixel = World.Width * TileSize - 1;
             BottomMapPixel = World.Height * TileSize - 1;
             RightLimit = World.Width * TileSize - Width;
@@ -138,8 +139,9 @@ namespace SGen
         /// <param name = "y">Координата Y</param>
         /// <param name = "width">Ширина видимого экрана</param>
         /// <param name = "height">Высота видимого экрана</param>
-        public Screen(int x, int y, int width, int height)
+        public Screen(Box trackingObject, int x, int y, int width, int height)
         {
+            TrackingObject = trackingObject;
             RightMapPixelPixel = World.Width * TileSize - 1;
             BottomMapPixel = World.Height * TileSize - 1;
             RightLimit = World.Width * TileSize - width;
@@ -157,7 +159,7 @@ namespace SGen
         /// <param name="obj"></param>
         public void SetTrackingObject(Box obj)
         {
-            trackingobject = obj;
+            TrackingObject = obj;
         }
 
         /// <summary>
@@ -165,7 +167,7 @@ namespace SGen
         /// </summary>
         public void Update()
         {
-            Update(trackingobject.Center(), 0.02f);
+            Update(TrackingObject.Center(), 0.02f);
         }
 
         /// <summary>
