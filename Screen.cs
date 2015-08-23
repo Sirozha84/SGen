@@ -91,6 +91,10 @@ namespace SGen
         /// Область рисования
         /// </summary>
         Viewport viewport;
+        /// <summary>
+        /// Цвет фантомного слоя
+        /// </summary>
+        static int PhantomColor;
         #endregion
 
         /// <summary>
@@ -129,6 +133,7 @@ namespace SGen
             viewport = new Viewport(0, 0, Width, Height);
             BackShiftX = 0;
             BackShiftY = 0;
+            PhantomColor = 255;
         }
 
         /// <summaru>
@@ -214,6 +219,17 @@ namespace SGen
                 //Считаем участок в матрице для вывода на экран
                 int i1 = (int)(Camera.X / TileSize * (World.kX[l]));
                 int j1 = (int)(Camera.Y / TileSize * (World.kY[l]));
+                //Считаем прозрачность, если надо
+                Color col = Color.White;
+                if (World.Phantom > 0 && l == World.Phantom)
+                {
+                    bool under = false;
+                    World.Players.ForEach(o => { if (o.UnderPhantom()) under = true; });
+                    if (under & PhantomColor > 0) PhantomColor -= 16;
+                    if (!under & PhantomColor < 255) PhantomColor += 16;
+                    col = Color.FromNonPremultiplied(PhantomColor, PhantomColor, PhantomColor, PhantomColor);
+                }
+                //Рисуем слой
                 for (int i = i1; i < i1 + WidthInBlocks; i++)
                 {
                     for (int j = j1; j < j1 + HeightInBlocks; j++)
@@ -222,7 +238,7 @@ namespace SGen
                             spriteBatch.Draw(World.Texture,
                                 new Vector2(i * TileSize - (int)(World.kX[l] * Camera.X / PixelSize) * PixelSize,
                                 j * TileSize - (int)(World.kY[l] * Camera.Y / PixelSize) * PixelSize),
-                                RectByNum(World.M[l, i, j], World.Texture), Color.White);
+                                RectByNum(World.M[l, i, j], World.Texture), col);
                     }
                 }
             }

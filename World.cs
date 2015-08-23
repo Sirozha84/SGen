@@ -41,6 +41,10 @@ namespace SGen
         /// </summary>
         public static byte Main;
         /// <summary>
+        /// Фантомный слой
+        /// </summary>
+        public static byte Phantom;
+        /// <summary>
         /// Текстура для задника
         /// </summary>
         public static Texture2D Background;
@@ -85,6 +89,7 @@ namespace SGen
             Height = file.ReadUInt16();
             Layers = file.ReadByte();
             Main = file.ReadByte();
+            Phantom = file.ReadByte();
             M = new ushort[Layers + 1, Width, Height];
             kX = new float[Layers + 1];
             kY = new float[Layers + 1];

@@ -517,6 +517,18 @@ namespace SGen
         }
 
         /// <summary>
+        /// Проверка не находится ли объект под фантомным тайлом
+        /// </summary>
+        /// <returns></returns>
+        public bool UnderPhantom()
+        {
+            if (World.Phantom == 0) return false;
+            int x = (int)(Position.X + Width / 2) / Screen.TileSize;
+            int y = (int)(Position.Y + Top + (Height - Top) / 2) / Screen.TileSize;
+            return World.M[World.Phantom, x, y] > 0;
+        }
+
+        /// <summary>
         /// Пометить объект на уничтожение
         /// </summary>
         public void Destroy()
