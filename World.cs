@@ -57,12 +57,22 @@ namespace SGen
         /// </summary>
         public static List<Box> Objects = new List<Box>();
         /// <summary>
+        /// Главный персонаж
+        /// </summary>
+        public static List<Box> Players = new List<Box>();
+        /// <summary>
+        /// Тип объекта, которым является главный персонаж
+        /// </summary>
+        static Type PlayerType;
+        /// <summary>
         /// Загрузка карты и графики для неё
         /// </summary>
         /// <param name="MapFile">Файл карты в формате SGMap, создаррая редактором Map Editor</param>
-        public World(string MapFile, Game game)
+        /// <param name="game">Ссылка на Game</param>
+        /// <param name="playertype">Класса персонажа</param>
+        public World(string MapFile, Game game, Type playerType)
         {
-            //string mapFile = game.Content.RootDirectory + MapFile + ".map";
+            PlayerType = playerType;
             M = null;
             kX = null;
             kY = null;
@@ -156,7 +166,11 @@ namespace SGen
                     if (M[0, i, j] > 0)
                     {
                         Box o = AddObject(M[0, i, j], i * Screen.TileSize, j * Screen.TileSize);
-                        if (o != null) Objects.Add(o);
+                        if (o != null)
+                        {
+                            Objects.Add(o);
+                            if (o.GetType() == PlayerType) Players.Add(o);
+                        }
                     }
         }
 
@@ -170,6 +184,7 @@ namespace SGen
             {
                 o.Update();
                 if (o.CollisionTests) Objects.ForEach(s => o.CollisionTest(s));
+                if (o.TriggerDistance > 0) o.TriggerTest();
             });
             //Уничтожение всех вылетевших за предел экрана или уничтоженных объектов
             Objects.RemoveAll(o => o.Out() | o.Destroyed);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -70,9 +71,17 @@ namespace SGen
         /// </summary>
         float Rebound;
         /// <summary>
-        /// 
+        /// Объект следит за столкновениями
         /// </summary>
         public bool CollisionTests;
+        /// <summary>
+        /// Реакция на приближение, 0 - если объект не реагирует
+        /// </summary>
+        public int TriggerDistance;
+        /// <summary>
+        /// Список объектов, проверяеммых на приближение
+        /// </summary>
+        public List<Box> ObjectsForTriggers;
         #endregion
 
         #region Рабочие переменные
@@ -80,8 +89,8 @@ namespace SGen
         /// Позиция объекта
         /// </summary>
         Vector2 Position;
-         /// <summary>
-        /// Забыл описать переменную, теперь не знаю что она делает :-( но без неё беда беда прям
+        /// <summary>
+        /// Позиция объекта, округляемая для рисования (не настоящая)
         /// </summary>
         Vector2 PositionFake;
         /// <summary>
@@ -136,13 +145,18 @@ namespace SGen
         /// <summary>
         /// Рисование объекта
         /// </summary>
-        //public abstract void Draw();
+        public abstract void Draw(Screen screen);
 
         /// <summary>
         /// Действие при коллизиях с указанным объекта
         /// </summary>
         /// <param name="box">Объект, с которым произошло столкновение</param>
         public abstract void Collision(Box box);
+
+        /// <summary>
+        /// Сработал триггер
+        /// </summary>
+        public abstract void Trigger();
         #endregion
 
         /// <summary>
@@ -163,6 +177,7 @@ namespace SGen
             DownIntoPlatform = false;
             Weight = 0;
             Rebound = 0;
+            TriggerDistance = 0;
         }
         /// <summary>
         /// Конструктор игрового объекта, не имеющего веса и проверку на столкновения
@@ -187,6 +202,7 @@ namespace SGen
             DownIntoPlatform = false;
             Weight = 0;
             Rebound = 0;
+            TriggerDistance = 0;
         }
 
         /// <summary>
@@ -203,8 +219,9 @@ namespace SGen
         /// <param name = "weight">Вес объекта, 0 - если невесомый</param>
         /// <param name = "downIntoPlatform">Проходит ли вниз через платформы</param>
         /// <param name = "rebound">Коэффициент отскока от 0 до 1</param>
+        /// <param name = "triggerDistance">Дистанция триггера. 0 - объект не реагирует на приближения</param>
         public Box(int x, int y, int width, int height, int side, int top, bool collision,
-            bool hard, bool downIntoPlatform, float weight, float rebound)
+            bool hard, bool downIntoPlatform, float weight, float rebound, int triggerDistance)
         {
             Position = new Vector2(x, y);
             Width = width;
@@ -217,6 +234,7 @@ namespace SGen
             DownIntoPlatform = downIntoPlatform;
             Weight = weight;
             Rebound = rebound;
+            TriggerDistance = triggerDistance;
         }
 
         /// <summary>
@@ -226,8 +244,6 @@ namespace SGen
         {
             return new Vector2(Position.X + Width / 2, Position.Y + (Height + Top) / 2);
         }
-
-        public abstract void Draw(Screen screen);
 
         /// <summary>
         /// Рисование спрайта
@@ -486,6 +502,23 @@ namespace SGen
             if (o1.Intersects(o2)) Collision(CompareObject);
         }
 
+        /// <summary>
+        /// Проверка на приближенность к указанному объекту
+        /// </summary>
+        /// <param name="CompareObject"></param>
+        public void TriggerTest()
+        {
+            World.Players.ForEach(o =>
+            {
+                double dist = Math.Sqrt(Math.Pow((o.Position.X + o.Width / 2) - (Position.X + Width / 2), 2) +
+                    Math.Pow((o.Position.Y + o.Top - (o.Height - o.Top) / 2) - (Position.Y + Top - (Height - Top) / 2), 2));
+                if (dist < TriggerDistance) Trigger();
+            });
+        }
+
+        /// <summary>
+        /// Пометить объект на уничтожение
+        /// </summary>
         public void Destroy()
         {
             Destroyed = true;

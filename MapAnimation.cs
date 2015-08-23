@@ -16,10 +16,6 @@ namespace SGen
         /// </summary>
         public enum Types { FW, FWBF, RND, RNDall }
         /// <summary>
-        /// Отображается ли анимация
-        /// </summary>
-        public static bool Enable;
-        /// <summary>
         /// Код тайла, для которого применяется
         /// </summary>
         public ushort Code;
