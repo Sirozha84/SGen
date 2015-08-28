@@ -134,6 +134,8 @@ namespace SGen
             BackShiftX = 0;
             BackShiftY = 0;
             PhantomColor = 255;
+            Camera.X = trackingObject.Center().X - CenterX;
+            Camera.Y = trackingObject.Center().Y - CenterY;
         }
 
         /// <summaru>
@@ -156,6 +158,9 @@ namespace SGen
             viewport = new Viewport(x, y, width, height);
             BackShiftX = width / 2 - Width / 2;
             BackShiftY = height / 2 - Height / 2;
+            PhantomColor = 255;
+            Camera.X = trackingObject.Center().X - CenterX;
+            Camera.Y = trackingObject.Center().Y - CenterY;
         }
 
         /// <summary>

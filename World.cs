@@ -155,9 +155,12 @@ namespace SGen
             }
             //Загружаем текстуры
             file.ReadString();
-            Background = game.Content.Load<Texture2D>(Path.GetFileNameWithoutExtension(file.ReadString()));
-            Texture = game.Content.Load<Texture2D>(Path.GetFileNameWithoutExtension(file.ReadString()));
-            Front = game.Content.Load<Texture2D>(Path.GetFileNameWithoutExtension(file.ReadString()));
+            string filename = file.ReadString();
+            if (filename != "") Background = game.Content.Load<Texture2D>(Path.GetFileNameWithoutExtension(filename));
+            filename = file.ReadString();
+            if (filename != "") Texture = game.Content.Load<Texture2D>(Path.GetFileNameWithoutExtension(filename));
+            filename = file.ReadString();
+            if (filename != "") Front = game.Content.Load<Texture2D>(Path.GetFileNameWithoutExtension(filename));
             file.ReadString();
             //Загружаем правила анимации
             file.ReadString();
