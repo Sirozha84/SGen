@@ -71,7 +71,8 @@ namespace SGen
         /// <summary>
         /// Загрузка карты и графики для неё
         /// </summary>
-        /// <param name="MapFile">Файл карты в формате SGMap, создаррая редактором Map Editor</param>
+        /// <param name="MapFile">Файл карты в формате SGMap, создаррая редактором SGen Tiler
+        ///                       Вводится в формате "\\test.map" или "/test.map" в зависимости от платформы</param>
         /// <param name="game">Ссылка на Game</param>
         /// <param name="playertype">Класса персонажа</param>
         public World(string MapFile, Game game, Type playerType)
@@ -80,7 +81,7 @@ namespace SGen
             M = null;
             kX = null;
             kY = null;
-            BinaryReader file = new BinaryReader(new FileStream(game.Content.RootDirectory + "\\" + MapFile + ".map", FileMode.Open));
+            BinaryReader file = new BinaryReader(new FileStream(game.Content.RootDirectory + MapFile, FileMode.Open));
             file.ReadString();
             Screen.TileSize = file.ReadUInt16();
             file.ReadUInt16();
