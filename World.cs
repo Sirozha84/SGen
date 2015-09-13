@@ -61,7 +61,7 @@ namespace SGen
         /// </summary>
         public static List<Box> Objects = new List<Box>();
         /// <summary>
-        /// Главный персонаж
+        /// Список игроков
         /// </summary>
         public static List<Box> Players = new List<Box>();
         /// <summary>
@@ -174,12 +174,13 @@ namespace SGen
                 for (int j = 0; j < Height; j++)
                     if (M[0, i, j] > 0)
                     {
-                        Box o = AddObject(M[0, i, j], i * Screen.TileSize, j * Screen.TileSize);
-                        if (o != null)
+                        AddObject(M[0, i, j], i * Screen.TileSize, j * Screen.TileSize);
+                        //Box o = AddObject(M[0, i, j], i * Screen.TileSize, j * Screen.TileSize);
+                        /*if (o != null)
                         {
                             Objects.Add(o);
                             if (o.GetType() == PlayerType) Players.Add(o);
-                        }
+                        }*/
                     }
         }
 
@@ -197,7 +198,7 @@ namespace SGen
             });
             //Уничтожение всех вылетевших за предел экрана или уничтоженных объектов
             Objects.RemoveAll(o => o.Out() | o.Destroyed);
-            //Обработка анимации
+            //Обработка пассивной анимации карты
             foreach (MapAnimation anim in MapAnimation.List) anim.Update();
         }
 
@@ -207,6 +208,6 @@ namespace SGen
         /// <param name="code"></param>
         /// <param name="x"></param>
         /// <param name="y"></param>
-        abstract public Box AddObject(ushort code, int x, int y);
+        abstract public void AddObject(ushort code, int x, int y);
     }
 }
