@@ -99,19 +99,19 @@ namespace SGen
         /// <summary>
         /// Максимальная скорость движения
         /// </summary>
-        float MaxSpeed = 5;
+        protected float MaxSpeed = 5;
         /// <summary>
         /// Максимальная скорость падения (не больше размера спрайта)
         /// </summary>
-        float MaxFallSpeed = 32;
+        protected float MaxFallSpeed = 32;
         /// <summary>
         /// Ускорение движения
         /// </summary>
-        float Acceliration = 0.5f;
+        protected float Acceliration = 0.5f;
         /// <summary>
         /// Скорость прыжка
         /// </summary>
-        float JumpSpeed = 5;
+        protected float JumpSpeed = 5;
         /// <summary>
         /// Флаг движения в последний кадр
         /// </summary>
@@ -123,15 +123,19 @@ namespace SGen
         /// <summary>
         /// Номер анимации
         /// </summary>
-        public int AnimationSet = 0;
+        protected int AnimationSet = 0;
         /// <summary>
         /// Номер кадра
         /// </summary>
-        public int AnimationFrame = 0;
+        protected int AnimationFrame = 0;
         /// <summary>
         /// Направление (больше 0 - вправо, меньше 0 - влево)
         /// </summary>
-        public int AnimationSide = 0;
+        protected int AnimationSide = 0;
+        /// <summary>
+        /// Падаем?
+        /// </summary>
+        protected bool Fall = false;
         #endregion
 
         #region Абстрактные методы
@@ -385,6 +389,14 @@ namespace SGen
         }
 
         /// <summary>
+        /// Команда: прыгай с указанной скоростью
+        /// </summary>
+        public void Jump(float jumpSpeed)
+        {
+            Speed.Y = -jumpSpeed;
+        }
+
+        /// <summary>
         /// Задание импульса с заданным углом направления и силой
         /// </summary>
         /// <param name="angle">Угол, измеряемый в радианах (с "3-х часов" против часовой)</param>
@@ -429,9 +441,10 @@ namespace SGen
             PositionFake += Speed;
             
             if (Speed.Y > MaxFallSpeed) Speed.Y = MaxFallSpeed;
-            int x = (int)PositionFake.X - (int)Position.X; //Хрен знает как оно работает, вовремя не прокоментировал,
-            int y = (int)PositionFake.Y - (int)Position.Y; //Теперь "это" лучше не трогать!
-            bool Ground = false;
+            int x = (int)PositionFake.X - (int)Position.X; //Количество пикселей, которое надо пройти за этот кадр
+            int y = (int)PositionFake.Y - (int)Position.Y;
+            //Падаем?
+            Fall = false;
             //Отскок от стен
             if (x != 0)
             {
@@ -442,6 +455,7 @@ namespace SGen
                 }
             }
             //Отскок от пола или потолка
+            bool Ground = false;
             if (y != 0)
             {
                 if (!MoveY(y))
@@ -449,6 +463,10 @@ namespace SGen
                     Speed.Y = -(int)(Speed.Y * Rebound - 1);
                     if (Speed.Y >= -1 & Speed.Y <= 1) Speed.Y = Speed.Y / 2;
                     if (y > 0) Ground = true;
+                }
+                else
+                {
+                    Fall = true;
                 }
             }
             //Замедляемся, если небыло управления
