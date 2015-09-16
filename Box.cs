@@ -420,8 +420,9 @@ namespace SGen
         /// Обработка физики.
         /// Вызывается каждый кадр когда объект находится в свободном падении.
         /// </summary>
-        /// <param name="Gravity">Учитывается ли гравитация</param>
-        public void Physics(bool Gravity)
+        // <param name="Gravity">Учитывается ли гравитация</param>
+        /// <returns>Возвращает true, если объект стоит на земле</returns>
+        public bool Physics(bool Gravity)
         {
             PositionFake = Position; 
             if (Gravity && Weight > 0) Speed.Y += Gravitation;
@@ -430,6 +431,7 @@ namespace SGen
             if (Speed.Y > MaxFallSpeed) Speed.Y = MaxFallSpeed;
             int x = (int)PositionFake.X - (int)Position.X; //Хрен знает как оно работает, вовремя не прокоментировал,
             int y = (int)PositionFake.Y - (int)Position.Y; //Теперь "это" лучше не трогать!
+            bool Ground = false;
             //Отскок от стен
             if (x != 0)
             {
@@ -446,6 +448,7 @@ namespace SGen
                 {
                     Speed.Y = -(int)(Speed.Y * Rebound - 1);
                     if (Speed.Y >= -1 & Speed.Y <= 1) Speed.Y = Speed.Y / 2;
+                    if (y > 0) Ground = true;
                 }
             }
             //Замедляемся, если небыло управления
@@ -463,6 +466,7 @@ namespace SGen
                 }
             }
             ControlMove = false;
+            return Ground;
         }
         
         /// <summary>
