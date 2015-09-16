@@ -103,11 +103,11 @@ namespace SGen
         /// <param name="graphics">GraphicsDeviceManager</param>
         /// <param name="width">Ширина экрана</param>
         /// <param name="height">Высота экрана</param>
-        public static void Set(GraphicsDeviceManager graphics, int width, int height, int blocksize, int pixelsize)
+        public static void Set(GraphicsDeviceManager graphics, int width, int height, int tilesize, int pixelsize)
         {
             Width = width;
             Height = height;
-            TileSize = blocksize;
+            TileSize = tilesize;
             graphics.PreferredBackBufferWidth = Width;
             graphics.PreferredBackBufferHeight = Height;
             graphics.ApplyChanges();

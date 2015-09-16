@@ -87,7 +87,7 @@ namespace SGen
         /// <summary>
         /// Позиция объекта
         /// </summary>
-        Vector2 Position;
+        public Vector2 Position;
         /// <summary>
         /// Позиция объекта, округляемая для рисования (не настоящая)
         /// </summary>
@@ -415,15 +415,16 @@ namespace SGen
         {
             Speed = to;
         }
-        
+
         /// <summary>
         /// Обработка физики.
         /// Вызывается каждый кадр когда объект находится в свободном падении.
         /// </summary>
-        public void Physics()
+        /// <param name="Gravity">Учитывается ли гравитация</param>
+        public void Physics(bool Gravity)
         {
             PositionFake = Position; 
-            if (Weight>0) Speed.Y += Gravitation;
+            if (Gravity && Weight > 0) Speed.Y += Gravitation;
             PositionFake += Speed;
             
             if (Speed.Y > MaxFallSpeed) Speed.Y = MaxFallSpeed;
@@ -510,7 +511,7 @@ namespace SGen
             World.Players.ForEach(o =>
             {
                 double dist = Math.Sqrt(Math.Pow((o.Position.X + o.Width / 2) - (Position.X + Width / 2), 2) +
-                    Math.Pow((o.Position.Y + o.Top - (o.Height - o.Top) / 2) - (Position.Y + Top - (Height - Top) / 2), 2));
+                    Math.Pow((o.Position.Y + o.Top + (o.Height - o.Top) / 2) - (Position.Y + Top + (Height - Top) / 2), 2));
                 if (dist < TriggerDistance) Trigger();
             });
         }

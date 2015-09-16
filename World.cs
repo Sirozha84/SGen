@@ -83,7 +83,7 @@ namespace SGen
             kY = null;
             BinaryReader file = new BinaryReader(new FileStream(game.Content.RootDirectory + MapFile, FileMode.Open));
             file.ReadString();
-            Screen.TileSize = file.ReadUInt16();
+            /*Screen.TileSize =*/ file.ReadUInt16();
             file.ReadUInt16();
             file.ReadUInt16();
             Width = file.ReadUInt16();
