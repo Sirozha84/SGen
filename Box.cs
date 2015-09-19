@@ -59,7 +59,7 @@ namespace SGen
         /// <summary>
         /// Может ли объект стоять на платформах
         /// </summary>
-        bool DownIntoPlatform;
+        protected bool DownIntoPlatform;
         /// <summary>
         /// Вес объекта. Определяет, будет ли объект падать, и определяет скорость замедления по X.
         /// 0 - Объект совсем не падает и не замедляется.
@@ -249,7 +249,7 @@ namespace SGen
         }
 
         /// <summary>
-        /// Рисование спрайта
+        /// Рисование главного спрайта
         /// </summary>
         /// <param name = "spritebatch">SpriteBatch</param>
         /// <param name = "texture">Текстура</param>
@@ -264,8 +264,29 @@ namespace SGen
                 new Rectangle(
                     (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.X / Screen.PixelSize) * Screen.PixelSize,
                     (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.Y / Screen.PixelSize) * Screen.PixelSize,
-                    Width, Height), new Rectangle(AnimationFrame * Width, AnimationSet * Height, Width, Height),
+                    Width, Height),
+                new Rectangle(AnimationFrame * Width, AnimationSet * Height, Width, Height),
                 Color.White, 0, new Vector2(0, 0), effect, 0);
+        }
+
+        /// <summary>
+        /// Рисование дополнительного спрайта
+        /// </summary>
+        /// <param name="texture"></param>
+        /// <param name="screen"></param>
+        /// <param name="x">Смещение по X</param>
+        /// <param name="y">Смещение по Y</param>
+        /// <param name="rect">Область спрайта</param>
+        public void Draw(Texture2D texture, Screen screen, int x, int y, Rectangle rect)
+        {
+            SpriteEffects effect = SpriteEffects.None;
+            if (AnimationSide < 0) effect = SpriteEffects.FlipHorizontally;
+            spriteBatch.Draw(texture,
+                new Rectangle(
+                    (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.X / Screen.PixelSize) * Screen.PixelSize + x,
+                    (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.Y / Screen.PixelSize) * Screen.PixelSize + y,
+                    rect.Width, rect.Height),
+                rect, Color.White, 0, new Vector2(0, 0), effect, 0);
         }
 
         /// <summary>
