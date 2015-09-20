@@ -18,6 +18,10 @@ namespace SGen
         /// </summary>
         public static SpriteBatch spriteBatch;
         /// <summary>
+        /// Текущий "скрин", в котором рисуется сцена.
+        /// </summary>
+        public static Screen screen;
+        /// <summary>
         /// G-константа (ускорение свободного падения)
         /// </summary>
         public static float Gravitation = 0.3F;
@@ -39,11 +43,11 @@ namespace SGen
         /// <summary>
         /// Размеры спрайта (ширина)
         /// </summary>
-        int Width;
+        protected int Width;
         /// <summary>
         /// Размеры спрайта (высота)
         /// </summary>
-        int Height;
+        protected int Height;
         /// <summary>
         /// Растояние от бордюров спрайта до чувствительных зоны по сторонам
         /// </summary>
@@ -136,6 +140,10 @@ namespace SGen
         /// Падаем?
         /// </summary>
         protected bool Fall = false;
+        /// <summary>
+        /// Рандомайзер
+        /// </summary>
+        protected static Random RND = new Random();
         #endregion
 
         #region Абстрактные методы
@@ -148,7 +156,7 @@ namespace SGen
         /// <summary>
         /// Рисование объекта
         /// </summary>
-        public abstract void Draw(Screen screen);
+        public abstract void Draw();
 
         /// <summary>
         /// Действие при коллизиях с указанным объекта
@@ -256,7 +264,21 @@ namespace SGen
         /// <param name = "numAn">Номер анимации</param>
         /// <param name = "numKd">Номер кадра</param>
         /// <param name = "pos">Направление (+1 - вправо, -1 - влево)</param>
-        public void Draw(Texture2D texture, Screen screen) //(Texture2D texture, int numAn, int numKd, int pos, Screen screen)
+        public void Draw(Texture2D texture) //(Texture2D texture, int numAn, int numKd, int pos, Screen screen)
+        {
+            Draw(texture, Color.White);
+            /*SpriteEffects effect = SpriteEffects.None;
+            if (AnimationSide < 0) effect = SpriteEffects.FlipHorizontally;
+            spriteBatch.Draw(texture,
+                new Rectangle(
+                    (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.X / Screen.PixelSize) * Screen.PixelSize,
+                    (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.Y / Screen.PixelSize) * Screen.PixelSize,
+                    Width, Height),
+                new Rectangle(AnimationFrame * Width, AnimationSet * Height, Width, Height),
+                Color.White, 0, new Vector2(0, 0), effect, 0);*/
+        }
+
+        public void Draw(Texture2D texture, Color col)
         {
             SpriteEffects effect = SpriteEffects.None;
             if (AnimationSide < 0) effect = SpriteEffects.FlipHorizontally;
@@ -266,7 +288,7 @@ namespace SGen
                     (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.Y / Screen.PixelSize) * Screen.PixelSize,
                     Width, Height),
                 new Rectangle(AnimationFrame * Width, AnimationSet * Height, Width, Height),
-                Color.White, 0, new Vector2(0, 0), effect, 0);
+                col, 0, new Vector2(0, 0), effect, 0);
         }
 
         /// <summary>
@@ -276,8 +298,8 @@ namespace SGen
         /// <param name="screen"></param>
         /// <param name="x">Смещение по X</param>
         /// <param name="y">Смещение по Y</param>
-        /// <param name="rect">Область спрайта</param>
-        public void Draw(Texture2D texture, Screen screen, int x, int y, Rectangle rect)
+        /// <param name="source">Область спрайта</param>
+        public void Draw(Texture2D texture, int x, int y, Rectangle source)
         {
             SpriteEffects effect = SpriteEffects.None;
             if (AnimationSide < 0) effect = SpriteEffects.FlipHorizontally;
@@ -285,8 +307,27 @@ namespace SGen
                 new Rectangle(
                     (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.X / Screen.PixelSize) * Screen.PixelSize + x,
                     (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.Y / Screen.PixelSize) * Screen.PixelSize + y,
-                    rect.Width, rect.Height),
-                rect, Color.White, 0, new Vector2(0, 0), effect, 0);
+                    source.Width, source.Height),
+                source, Color.White, 0, new Vector2(0, 0), effect, 0);
+        }
+
+        /// <summary>
+        /// Рисование дополнительного спрайта
+        /// </summary>
+        /// <param name="texture"></param>
+        /// <param name="screen"></param>
+        /// <param name="dist">Область спрайта</param>
+        /// <param name="source">Область источника</param>
+        public void Draw(Texture2D texture, Rectangle dist, Rectangle source)
+        {
+            SpriteEffects effect = SpriteEffects.None;
+            if (AnimationSide < 0) effect = SpriteEffects.FlipHorizontally;
+            spriteBatch.Draw(texture,
+                new Rectangle(
+                    (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.X / Screen.PixelSize) * Screen.PixelSize + dist.X,
+                    (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.Y / Screen.PixelSize) * Screen.PixelSize + dist.Y,
+                    dist.Width, dist.Height),
+                source, Color.White, 0, new Vector2(0, 0), effect, 0);
         }
 
         /// <summary>

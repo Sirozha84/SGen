@@ -274,8 +274,12 @@ namespace SGen
             spriteBatch.Begin();
             spriteBatch.Draw(World.Background, new Rectangle(BackShiftX, BackShiftY, Width, Height),
                 new Rectangle(0, 0, World.Background.Width, World.Background.Height), Color.White);
+            //Рисование задних фонов
             Draw(DrawMode.Back);
-            World.Objects.ForEach(o => o.Draw(this));
+            //Рисование объектов
+            Box.screen = this;
+            World.Objects.ForEach(o => o.Draw());
+            //Рисование передних фонов
             Draw(DrawMode.Front);
             if (World.Front != null) spriteBatch.Draw(World.Front, new Rectangle(BackShiftX, BackShiftY, Width, Height),
                 new Rectangle(0, 0, World.Front.Width, World.Front.Height), Color.White);
