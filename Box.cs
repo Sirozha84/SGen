@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Audio;
 
 namespace SGen
 {
@@ -28,11 +29,11 @@ namespace SGen
         /// <summary>
         /// Список блоков не пускающих по всем направлениям
         /// </summary>
-        public static int[] Hards = new int[0];
+        public static int[] Grounds = new int[0];
         /// <summary>
         /// Список блоков, не пускающих вниз (Платформы на которые можно запрыгнуть снизу)
         /// </summary>
-        public static int[] HardsDown = new int[0];
+        public static int[] Platforms = new int[0];
         /// <summary>
         /// Расстояние вылета за пределы карты, уничтожающее объект
         /// </summary>
@@ -267,15 +268,6 @@ namespace SGen
         public void Draw(Texture2D texture) //(Texture2D texture, int numAn, int numKd, int pos, Screen screen)
         {
             Draw(texture, Color.White);
-            /*SpriteEffects effect = SpriteEffects.None;
-            if (AnimationSide < 0) effect = SpriteEffects.FlipHorizontally;
-            spriteBatch.Draw(texture,
-                new Rectangle(
-                    (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.X / Screen.PixelSize) * Screen.PixelSize,
-                    (int)(Position.Y / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.Y / Screen.PixelSize) * Screen.PixelSize,
-                    Width, Height),
-                new Rectangle(AnimationFrame * Width, AnimationSet * Height, Width, Height),
-                Color.White, 0, new Vector2(0, 0), effect, 0);*/
         }
 
         public void Draw(Texture2D texture, Color col)
@@ -415,10 +407,10 @@ namespace SGen
             {
                 //Надо проверить не находится ли точка в самом верху
                 //(только если так - тогда платформане даёт упасть)
-                if ((y) % Screen.TileSize == 0) foreach (int b in HardsDown) if (dot == b) return false;
+                if ((y) % Screen.TileSize == 0) foreach (int b in Platforms) if (dot == b) return false;
             }
             //Платформа не помешала - двигаемся дальше
-            foreach (int b in Hards) if (dot == b) return false;
+            foreach (int b in Grounds) if (dot == b) return false;
             return true;
         }
 
@@ -618,6 +610,51 @@ namespace SGen
         public void Destroy()
         {
             Destroyed = true;
+        }
+
+        /// <summary>
+        /// Проверка точки на наличие стены
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        protected bool Ground(int x, int y, bool andPlatforms)
+        {
+            bool ground = false;
+            for (int i = 0; i < Grounds.Length; i++)
+                if (World.M[0, ((int)Position.X + x) / Screen.TileSize, ((int)Position.Y + y) / Screen.TileSize] == Grounds[i]) ground = true;
+            return ground;
+        }
+
+        /// <summary>
+        /// Находится ли объект в зоне видимости?
+        /// </summary>
+        /// <returns></returns>
+        protected bool Visible()
+        {
+            bool visible = true;
+            if (Position.X + Width < screen.Camera.X) visible = false;
+            if (Position.Y + Height < screen.Camera.Y) visible = false;
+            if (Position.X > screen.Camera.X + screen.viewport.Width) visible = false;
+            if (Position.Y > screen.Camera.Y + screen.viewport.Height) visible = false;
+            return visible;
+        }
+
+        protected float Pan()
+        {
+            if (Position.X + Width < screen.Camera.X) return -1;
+            if (Position.Y + Height < screen.Camera.Y) return 1;
+            return 0;
+        }
+
+        /// <summary>
+        /// Воспроизведение звука, если объект видно (если не видно, он играет тише с той стороны, где он находится)
+        /// </summary>
+        /// <param name="snd"></param>
+        protected void PlayIfVisible(SoundEffect snd)
+        {
+            if (Visible()) snd.Play();
+            else snd.Play(0.3f, 0, Pan());
         }
     }
 }

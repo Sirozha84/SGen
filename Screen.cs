@@ -23,11 +23,11 @@ namespace SGen
         /// <summary>
         /// Ширина экрана в пикселях
         /// </summary>
-        private static int Width;
+        static int Width;
         /// <summary>
         /// Высота экрана в пикселях
         /// </summary>
-        private static int Height;
+        static int Height;
         /// <summary>
         /// Размер тайла
         /// </summary>
@@ -64,13 +64,10 @@ namespace SGen
         /// </summary>
         internal int BackShiftY;
         /// <summary>
-        /// Точка центра камеры по X
+        /// Точка центра камеры
         /// </summary>
-        public int CenterX;
-        /// <summary>
-        /// Точка центра камеры по Y
-        /// </summary>
-        public int CenterY;
+        public Point CameraCenter;
+        //public Rectangle Camera;
         /// <summary>
         /// Ширина экрана в блоках (нужна для рисования мира)
         /// </summary>
@@ -84,13 +81,13 @@ namespace SGen
         /// </summary>
         Box TrackingObject;
         /// <summary>
-        /// Положение камеры (центр)
+        /// Позиция камеры
         /// </summary>
         public Vector2 Camera = new Vector2();
         /// <summary>
         /// Область рисования
         /// </summary>
-        Viewport viewport;
+        public Viewport viewport;
         /// <summary>
         /// Цвет фантомного слоя
         /// </summary>
@@ -128,14 +125,14 @@ namespace SGen
             BottomMapPixel = World.Height * TileSize - 1;
             RightLimit = World.Width * TileSize - Width;
             BottomLimit = World.Height * TileSize - Height;
-            CenterX = Width / 2;
-            CenterY = Height / 2;
+            CameraCenter.X = Width / 2;
+            CameraCenter.Y = Height / 2;
             viewport = new Viewport(0, 0, Width, Height);
             BackShiftX = 0;
             BackShiftY = 0;
             PhantomColor = 255;
-            Camera.X = trackingObject.Center().X - CenterX;
-            Camera.Y = trackingObject.Center().Y - CenterY;
+            Camera.X = trackingObject.Center().X - CameraCenter.X;
+            Camera.Y = trackingObject.Center().Y - CameraCenter.Y;
         }
 
         /// <summaru>
@@ -153,14 +150,14 @@ namespace SGen
             BottomMapPixel = World.Height * TileSize - 1;
             RightLimit = World.Width * TileSize - width;
             BottomLimit = World.Height * TileSize - height;
-            CenterX = width / 2;
-            CenterY = height / 2;
+            CameraCenter.X = width / 2;
+            CameraCenter.Y = height / 2;
             viewport = new Viewport(x, y, width, height);
             BackShiftX = width / 2 - Width / 2;
             BackShiftY = height / 2 - Height / 2;
             PhantomColor = 255;
-            Camera.X = trackingObject.Center().X - CenterX;
-            Camera.Y = trackingObject.Center().Y - CenterY;
+            Camera.X = trackingObject.Center().X - CameraCenter.X;
+            Camera.Y = trackingObject.Center().Y - CameraCenter.Y;
         }
 
         /// <summary>
@@ -197,8 +194,8 @@ namespace SGen
         public void Update(Vector2 position, float a)
         {
             //Движем камеру к точке
-            Camera.X += (position.X - CenterX - Camera.X) * a;
-            Camera.Y += (position.Y - CenterY - Camera.Y) * a;
+            Camera.X += (position.X - CameraCenter.X - Camera.X) * a;
+            Camera.Y += (position.Y - CameraCenter.Y - Camera.Y) * a;
             //Корректируем движение чтоб камера не вылетала за пределы карты
             if (Camera.X > RightLimit) Camera.X = RightLimit;
             if (Camera.Y > BottomLimit) Camera.Y = BottomLimit;
