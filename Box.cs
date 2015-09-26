@@ -682,6 +682,7 @@ namespace SGen
         {
             Speed.X = 0;
             Speed.Y = 0;
+            Fall = false;
         }
     }
 }
