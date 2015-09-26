@@ -326,7 +326,7 @@ namespace SGen
         /// Движение объекта по горизонтали. Возвращает True, если движению ничего не препядствовало.
         /// </summary>
         /// <param name="Delta">Расстояние перемещения.</param>
-        bool MoveX(int Delta)
+        protected bool MoveX(int Delta)
         {
             //Подготавливаем начальные переменные
             if (!Hard)
@@ -361,7 +361,7 @@ namespace SGen
         /// Движение объекта по вертикали. Возвращает True, если движению ничего не препядствовало.
         /// </summary>
         /// <param name="Delta">Расстояние перемещения.</param>
-        bool MoveY(int Delta)
+        protected bool MoveY(int Delta)
         {
             //Подготавливаем начальные переменные
             if (!Hard)
@@ -490,7 +490,8 @@ namespace SGen
         /// <returns>Возвращает true, если объект стоит на земле</returns>
         public bool Physics(bool Gravity)
         {
-            PositionFake = Position; 
+            PositionFake = Position;
+            if (!Gravity) Speed.Y = 0;
             if (Gravity && Weight > 0) Speed.Y += Gravitation;
             PositionFake += Speed;
             
@@ -620,10 +621,23 @@ namespace SGen
         /// <returns></returns>
         protected bool Ground(int x, int y, bool andPlatforms)
         {
+            //Сделать проверку на то что точка в матрице
             bool ground = false;
             for (int i = 0; i < Grounds.Length; i++)
                 if (World.M[0, ((int)Position.X + x) / Screen.TileSize, ((int)Position.Y + y) / Screen.TileSize] == Grounds[i]) ground = true;
             return ground;
+        }
+
+        /// <summary>
+        /// Что за тайл находится в этой точке?
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        protected int WhatIsTiler(int x, int y)
+        {
+            //Сделать проверку на то что точка в матрице
+            return World.M[0, ((int)Position.X + x) / Screen.TileSize, ((int)Position.Y + y) / Screen.TileSize];
         }
 
         /// <summary>
@@ -640,6 +654,10 @@ namespace SGen
             return visible;
         }
 
+        /// <summary>
+        /// Определение стороны, с которой играет звук
+        /// </summary>
+        /// <returns></returns>
         protected float Pan()
         {
             if (Position.X + Width < screen.Camera.X) return -1;
@@ -655,6 +673,15 @@ namespace SGen
         {
             if (Visible()) snd.Play();
             else snd.Play(0.3f, 0, Pan());
+        }
+
+        /// <summary>
+        /// Сброс ускорений и полная остановка
+        /// </summary>
+        protected void SpeedReset()
+        {
+            Speed.X = 0;
+            Speed.Y = 0;
         }
     }
 }
