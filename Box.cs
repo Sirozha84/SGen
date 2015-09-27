@@ -44,19 +44,19 @@ namespace SGen
         /// <summary>
         /// Размеры спрайта (ширина)
         /// </summary>
-        protected int Width;
+        public int Width;
         /// <summary>
         /// Размеры спрайта (высота)
         /// </summary>
-        protected int Height;
+        public int Height;
         /// <summary>
         /// Растояние от бордюров спрайта до чувствительных зоны по сторонам
         /// </summary>
-        int Side;
+        public int SpaceSide;
         /// <summary>
         /// Растояние от бордюров спрайта до чувствительной зоны сверху 
         /// </summary>
-        int Top;
+        public int SpaceTop;
         /// <summary>
         /// Упирается ли объект в стены
         /// </summary>
@@ -140,7 +140,7 @@ namespace SGen
         /// <summary>
         /// Падаем?
         /// </summary>
-        protected bool Fall = false;
+        public bool Fall = false;
         /// <summary>
         /// Рандомайзер
         /// </summary>
@@ -182,8 +182,8 @@ namespace SGen
             //Остальное и не надо
             Width = 0;
             Height = 0;
-            Side = 0;
-            Top = 0;
+            SpaceSide = 0;
+            SpaceTop = 0;
             CollisionTests = false;
             Hard = false;
             DownIntoPlatform = false;
@@ -206,8 +206,8 @@ namespace SGen
             Position = new Vector2(x, y);
             Width = width;
             Height = height;
-            Side = side;
-            Top = top;
+            SpaceSide = side;
+            SpaceTop = top;
             CollisionTests = collision;
             //Остальные задаются в продвинутом конструкторе, здесь же выставляются дефолтные
             Hard = false;
@@ -238,8 +238,8 @@ namespace SGen
             Position = new Vector2(x, y);
             Width = width;
             Height = height;
-            Side = side;
-            Top = top;
+            SpaceSide = side;
+            SpaceTop = top;
             CollisionTests = collision;
             //Продвинутые переменные
             Hard = hard;
@@ -254,7 +254,7 @@ namespace SGen
         /// </summary>
         public Vector2 Center()
         {
-            return new Vector2(Position.X + Width / 2, Position.Y + (Height + Top) / 2);
+            return new Vector2(Position.X + Width / 2, Position.Y + (Height + SpaceTop) / 2);
         }
 
         /// <summary>
@@ -326,7 +326,7 @@ namespace SGen
         /// Движение объекта по горизонтали. Возвращает True, если движению ничего не препядствовало.
         /// </summary>
         /// <param name="Delta">Расстояние перемещения.</param>
-        protected bool MoveX(int Delta)
+        public bool MoveX(int Delta)
         {
             //Подготавливаем начальные переменные
             if (!Hard)
@@ -334,11 +334,11 @@ namespace SGen
                 Position.X += Delta;
                 return true;
             }
-            int x = (int)Position.X - Side + Width;
+            int x = (int)Position.X - SpaceSide + Width;
             int d = +1;
             if (Delta < 0)
             {
-                x = (int)Position.X + Side - 1;
+                x = (int)Position.X + SpaceSide - 1;
                 d = -1;
                 Delta = -Delta;
             }
@@ -346,7 +346,7 @@ namespace SGen
             for (int i = 0; i < Delta; i++)
             {
 
-                for (int y = (int)Position.Y + Top; y < Position.Y + Height; y += Screen.TileSize)
+                for (int y = (int)Position.Y + SpaceTop; y < Position.Y + Height; y += Screen.TileSize)
                 {
                     if (!CheckPoint(x, y, 0)) return false;
                 }
@@ -361,7 +361,7 @@ namespace SGen
         /// Движение объекта по вертикали. Возвращает True, если движению ничего не препядствовало.
         /// </summary>
         /// <param name="Delta">Расстояние перемещения.</param>
-        protected bool MoveY(int Delta)
+        public bool MoveY(int Delta)
         {
             //Подготавливаем начальные переменные
             if (!Hard)
@@ -373,7 +373,7 @@ namespace SGen
             int d = +1;
             if (Delta < 0)
             {
-                y = (int)Position.Y + Top - 1;
+                y = (int)Position.Y + SpaceTop - 1;
                 d = -1;
                 Delta = -Delta;
             }
@@ -381,11 +381,11 @@ namespace SGen
             for (int i = 0; i < Delta; i++)
             {
 
-                for (int x = (int)Position.X + Side; x < Position.X + Width - Side; x += Screen.TileSize)
+                for (int x = (int)Position.X + SpaceSide; x < Position.X + Width - SpaceSide; x += Screen.TileSize)
                 {
                     if (!CheckPoint(x, y, d)) return false;
                 }
-                if (!CheckPoint((int)Position.X - Side + Width - 1, y, d)) return false;
+                if (!CheckPoint((int)Position.X - SpaceSide + Width - 1, y, d)) return false;
                 Position.Y += d;
                 y += d;
             }
@@ -521,7 +521,7 @@ namespace SGen
                 }
                 else
                 {
-                    Fall = true;
+                    if (Speed.Y>0 & Gravity) Fall = true;
                 }
             }
             //Замедляемся, если небыло управления
@@ -573,9 +573,9 @@ namespace SGen
         public void CollisionTest(Box CompareObject)
         {
             if (this == CompareObject | !CollisionTests) return;
-            Rectangle o1 = new Rectangle((int)Position.X + Side, (int)Position.Y + Top, Width - Side * 2, Height - Top);
-            Rectangle o2 = new Rectangle((int)CompareObject.Position.X + CompareObject.Side, (int)CompareObject.Position.Y + CompareObject.Top,
-                CompareObject.Width - CompareObject.Side * 2, CompareObject.Height - CompareObject.Top);
+            Rectangle o1 = new Rectangle((int)Position.X + SpaceSide, (int)Position.Y + SpaceTop, Width - SpaceSide * 2, Height - SpaceTop);
+            Rectangle o2 = new Rectangle((int)CompareObject.Position.X + CompareObject.SpaceSide, (int)CompareObject.Position.Y + CompareObject.SpaceTop,
+                CompareObject.Width - CompareObject.SpaceSide * 2, CompareObject.Height - CompareObject.SpaceTop);
             if (o1.Intersects(o2)) Collision(CompareObject);
         }
 
@@ -588,7 +588,7 @@ namespace SGen
             World.Players.ForEach(o =>
             {
                 double dist = Math.Sqrt(Math.Pow((o.Position.X + o.Width / 2) - (Position.X + Width / 2), 2) +
-                    Math.Pow((o.Position.Y + o.Top + (o.Height - o.Top) / 2) - (Position.Y + Top + (Height - Top) / 2), 2));
+                    Math.Pow((o.Position.Y + o.SpaceTop + (o.Height - o.SpaceTop) / 2) - (Position.Y + SpaceTop + (Height - SpaceTop) / 2), 2));
                 if (dist < TriggerDistance) Trigger();
             });
         }
@@ -601,7 +601,7 @@ namespace SGen
         {
             if (World.Phantom == 0) return false;
             int x = (int)(Position.X + Width / 2) / Screen.TileSize;
-            int y = (int)(Position.Y + Top + (Height - Top) / 2) / Screen.TileSize;
+            int y = (int)(Position.Y + SpaceTop + (Height - SpaceTop) / 2) / Screen.TileSize;
             return World.M[World.Phantom, x, y] > 0;
         }
 
