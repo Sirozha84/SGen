@@ -67,7 +67,6 @@ namespace SGen
         /// Точка центра камеры
         /// </summary>
         public Point CameraCenter;
-        //public Rectangle Camera;
         /// <summary>
         /// Ширина экрана в блоках (нужна для рисования мира)
         /// </summary>
@@ -85,6 +84,10 @@ namespace SGen
         /// </summary>
         public Vector2 Camera = new Vector2();
         /// <summary>
+        /// Реальная позиция камеры (без учёта выхода за рамки, тряски и других коэффициентов)
+        /// </summary>
+        Vector2 CameraReal = new Vector2();
+        /// <summary>
         /// Область рисования
         /// </summary>
         public Viewport viewport;
@@ -92,6 +95,38 @@ namespace SGen
         /// Цвет фантомного слоя
         /// </summary>
         static int PhantomColor;
+        /// <summary>
+        /// Мощность тряски камеры
+        /// </summary>
+        static float ShakeRange;
+        /// <summary>
+        /// Скорость тряски камеры
+        /// </summary>
+        static int ShakeSpeed;
+        /// <summary>
+        /// Скорость затухания тряски камеры
+        /// </summary>
+        static float ShakeFade;
+        /// <summary>
+        /// Рандомайзер
+        /// </summary>
+        static Random RND = new Random();
+        /// <summary>
+        /// Точка стремления для отклонения
+        /// </summary>
+        Vector2 DevTo = new Vector2(0, 0);
+        /// <summary>
+        /// Разница от точки стремления до текущей точки (от рандомного числа до ноля, когда ноль, новая точка)
+        /// </summary>
+        Vector2 DevDelta;
+        /// <summary>
+        /// Скорость перехода от отчки к точке
+        /// </summary>
+        Vector2 DevSpeed;
+        /// <summary>
+        /// Таймер "прихода" до точки стремления
+        /// </summary>
+        int DevTime;
         #endregion
 
         /// <summary>
@@ -131,8 +166,9 @@ namespace SGen
             BackShiftX = 0;
             BackShiftY = 0;
             PhantomColor = 255;
-            Camera.X = trackingObject.Center().X - CameraCenter.X;
-            Camera.Y = trackingObject.Center().Y - CameraCenter.Y;
+            CameraReal.X = trackingObject.Center().X - CameraCenter.X;
+            CameraReal.Y = trackingObject.Center().Y - CameraCenter.Y;
+            Camera = CameraReal;
         }
 
         /// <summaru>
@@ -156,8 +192,9 @@ namespace SGen
             BackShiftX = width / 2 - Width / 2;
             BackShiftY = height / 2 - Height / 2;
             PhantomColor = 255;
-            Camera.X = trackingObject.Center().X - CameraCenter.X;
-            Camera.Y = trackingObject.Center().Y - CameraCenter.Y;
+            CameraReal.X = trackingObject.Center().X - CameraCenter.X;
+            CameraReal.Y = trackingObject.Center().Y - CameraCenter.Y;
+            Camera = CameraReal;
         }
 
         /// <summary>
@@ -194,13 +231,32 @@ namespace SGen
         public void Update(Vector2 position, float a)
         {
             //Движем камеру к точке
-            Camera.X += (position.X - CameraCenter.X - Camera.X) * a;
-            Camera.Y += (position.Y - CameraCenter.Y - Camera.Y) * a;
+            CameraReal.X += (position.X - CameraCenter.X - CameraReal.X) * a;
+            CameraReal.Y += (position.Y - CameraCenter.Y - CameraReal.Y) * a;
+            Camera = CameraReal;
             //Корректируем движение чтоб камера не вылетала за пределы карты
             if (Camera.X > RightLimit) Camera.X = RightLimit;
             if (Camera.Y > BottomLimit) Camera.Y = BottomLimit;
             if (Camera.X < 0) Camera.X = 0;
             if (Camera.Y < 0) Camera.Y = 0;
+            //Дрожание камеры
+            if (ShakeRange > 0)
+            {
+                DevTime -= 1;
+                if (DevTime < 0)
+                {
+                    //Новая точка стремления
+                    Vector2 DevOld = DevTo;
+                    int i = (int)ShakeRange;
+                    DevTo = new Vector2(RND.Next(-i, i), RND.Next(-i, i));
+                    DevTime = ShakeSpeed;
+                    //Дельты
+                    DevDelta = DevOld - DevTo;
+                    DevSpeed = DevDelta / DevTime;
+                }
+                Camera += DevTo + DevDelta;
+                DevDelta -= DevSpeed;
+            }
         }
 
         /// <summary>
@@ -281,6 +337,30 @@ namespace SGen
             if (World.Front != null) spriteBatch.Draw(World.Front, new Rectangle(BackShiftX, BackShiftY, Width, Height),
                 new Rectangle(0, 0, World.Front.Width, World.Front.Height), Color.White);
             spriteBatch.End();
+        }
+
+        /// <summary>
+        /// Тряска камеры
+        /// </summary>
+        /// <param name="Range">Диапазон (в пикселях)</param>
+        /// <param name="Speed">Скорость (количество кадров между отклонениями</param>
+        /// <param name="Fade">Скорость затухания (0 - очень быстро, 0.9F - нормально, 1 - никогда</param>
+        public void Shake(int Range, int Speed, float Fade)
+        {
+            ShakeRange = Range;
+            ShakeSpeed = Speed;
+            ShakeFade = Fade;
+            DevTime = 0;
+        }
+
+        /// <summary>
+        /// Обработка тряски камер
+        /// </summary>
+        public static void ShakeUpdate()
+        {
+            //if (ShakeRange > 0) ShakeRange -= ShakeFade;
+            if (ShakeRange > 0) ShakeRange *= ShakeFade;
+
         }
     }
 }
