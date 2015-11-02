@@ -94,7 +94,7 @@ namespace SGen
         /// <summary>
         /// Цвет фантомного слоя
         /// </summary>
-        static int PhantomColor;
+        int PhantomColor;
         /// <summary>
         /// Мощность тряски камеры
         /// </summary>
@@ -233,12 +233,12 @@ namespace SGen
             //Движем камеру к точке
             CameraReal.X += (position.X - CameraCenter.X - CameraReal.X) * a;
             CameraReal.Y += (position.Y - CameraCenter.Y - CameraReal.Y) * a;
-            Camera = CameraReal;
             //Корректируем движение чтоб камера не вылетала за пределы карты
-            if (Camera.X > RightLimit) Camera.X = RightLimit;
-            if (Camera.Y > BottomLimit) Camera.Y = BottomLimit;
-            if (Camera.X < 0) Camera.X = 0;
-            if (Camera.Y < 0) Camera.Y = 0;
+            if (CameraReal.X > RightLimit) CameraReal.X = RightLimit;
+            if (CameraReal.Y > BottomLimit) CameraReal.Y = BottomLimit;
+            if (CameraReal.X < 0) CameraReal.X = 0;
+            if (CameraReal.Y < 0) CameraReal.Y = 0;
+            Camera = CameraReal;
             //Дрожание камеры
             if (ShakeRange > 0)
             {
@@ -280,7 +280,15 @@ namespace SGen
                 //Устанавливаем цвет
                 Color col = Color.White;
                 if (World.Phantom > 0 && l == World.Phantom)
+                {
+                    //Вычисление прозрачности
+                    bool under = TrackingObject.UnderPhantom();
+                    //World.Players.ForEach(o => { if (o.UnderPhantom()) under = true; });
+                    //if (TrackingObject.UnderPhantom) under
+                    if (under & PhantomColor > 0) PhantomColor -= 16;
+                    if (!under & PhantomColor < 255) PhantomColor += 16;
                     col = Color.FromNonPremultiplied(PhantomColor, PhantomColor, PhantomColor, PhantomColor);
+                }
                 //Рисуем слой
                 for (int i = i1; i < i1 + WidthInBlocks; i++)
                 {
@@ -354,12 +362,6 @@ namespace SGen
         {
             //Тряска камер
             if (ShakeRange > 0) ShakeRange *= ShakeFade;
-            //Вычисление прозрачности
-            bool under = false;
-            World.Players.ForEach(o => { if (o.UnderPhantom()) under = true; });
-            if (under & PhantomColor > 0) PhantomColor -= 16;
-            if (!under & PhantomColor < 255) PhantomColor += 16;
-
         }
     }
 }
