@@ -277,16 +277,10 @@ namespace SGen
                 //Считаем участок в матрице для вывода на экран
                 int i1 = (int)(Camera.X / TileSize * (World.kX[l]));
                 int j1 = (int)(Camera.Y / TileSize * (World.kY[l]));
-                //Считаем прозрачность, если надо
+                //Устанавливаем цвет
                 Color col = Color.White;
                 if (World.Phantom > 0 && l == World.Phantom)
-                {
-                    bool under = false;
-                    World.Players.ForEach(o => { if (o.UnderPhantom()) under = true; });
-                    if (under & PhantomColor > 0) PhantomColor -= 16;
-                    if (!under & PhantomColor < 255) PhantomColor += 16;
                     col = Color.FromNonPremultiplied(PhantomColor, PhantomColor, PhantomColor, PhantomColor);
-                }
                 //Рисуем слой
                 for (int i = i1; i < i1 + WidthInBlocks; i++)
                 {
@@ -345,21 +339,26 @@ namespace SGen
         /// <param name="Range">Диапазон (в пикселях)</param>
         /// <param name="Speed">Скорость (количество кадров между отклонениями</param>
         /// <param name="Fade">Скорость затухания (0 - очень быстро, 0.9F - нормально, 1 - никогда</param>
-        public void Shake(int Range, int Speed, float Fade)
+        public static void Shake(int Range, int Speed, float Fade)
         {
             ShakeRange = Range;
             ShakeSpeed = Speed;
             ShakeFade = Fade;
-            DevTime = 0;
+            //DevTime = 0;
         }
 
         /// <summary>
-        /// Обработка тряски камер
+        /// Обработка глобальных значений
         /// </summary>
-        public static void ShakeUpdate()
+        internal static void GlobalUpdate()
         {
-            //if (ShakeRange > 0) ShakeRange -= ShakeFade;
+            //Тряска камер
             if (ShakeRange > 0) ShakeRange *= ShakeFade;
+            //Вычисление прозрачности
+            bool under = false;
+            World.Players.ForEach(o => { if (o.UnderPhantom()) under = true; });
+            if (under & PhantomColor > 0) PhantomColor -= 16;
+            if (!under & PhantomColor < 255) PhantomColor += 16;
 
         }
     }

@@ -200,8 +200,8 @@ namespace SGen
             Objects.RemoveAll(o => o.Out() | o.Destroyed);
             //Обработка пассивной анимации карты
             foreach (MapAnimation anim in MapAnimation.List) anim.Update();
-            //Вот здесь я и буду уменьшать таймер тряски, чтоб скорость не менялась в зависимости от количества экранов
-            Screen.ShakeUpdate();
+            //Анимация тряски и фантомных слоёв
+            Screen.GlobalUpdate();
         }
 
         /// <summary>
