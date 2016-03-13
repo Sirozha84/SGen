@@ -602,7 +602,10 @@ namespace SGen
             if (World.Phantom == 0) return false;
             int x = (int)(Position.X + Width / 2) / Screen.TileSize;
             int y = (int)(Position.Y + SpaceTop + (Height - SpaceTop) / 2) / Screen.TileSize;
-            return World.M[World.Phantom, x, y] > 0;
+            if (InMatrix(x, y))
+                return World.M[World.Phantom, x, y] > 0;
+            else
+                return false;
         }
 
         /// <summary>
@@ -637,7 +640,17 @@ namespace SGen
         protected int WhatIsTiler(int x, int y)
         {
             //Сделать проверку на то что точка в матрице
-            return World.M[0, ((int)Position.X + x) / Screen.TileSize, ((int)Position.Y + y) / Screen.TileSize];
+            x = (x + (int)Position.X) / Screen.TileSize;
+            y = (y + (int)Position.Y) / Screen.TileSize;
+            if (InMatrix(x, y)) 
+                return World.M[0, x , y];
+            else
+                return 0;
+        }
+
+        protected bool InMatrix(int x, int y)
+        {
+            return x >= 0 & y >= 0 & x < World.Width & y < World.Height;
         }
 
         /// <summary>
