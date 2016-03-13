@@ -681,11 +681,12 @@ namespace SGen
         /// <summary>
         /// Воспроизведение звука, если объект видно (если не видно, он играет тише с той стороны, где он находится)
         /// </summary>
-        /// <param name="snd"></param>
-        protected void PlayIfVisible(SoundEffect snd)
+        /// <param name="snd">Звук</param>
+        /// <param name="Tiho">true - если играть тихо с нужной стороны, false - если совсем не играть когда не в кадре</param>
+        protected void PlayIfVisible(SoundEffect snd, bool Tiho)
         {
             if (Visible()) snd.Play();
-            else snd.Play(0.3f, 0, Pan());
+            else if (Tiho) snd.Play(0.3f, 0, Pan());
         }
 
         /// <summary>
