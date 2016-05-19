@@ -65,6 +65,10 @@ namespace SGen
         /// </summary>
         public static List<Box> Players = new List<Box>();
         /// <summary>
+        /// Очередь объектов, созданных во время обработки
+        /// </summary>
+        static List<Box> Spool = new List<Box>();
+        /// <summary>
         /// Тип объекта, которым является главный персонаж
         /// </summary>
         static Type PlayerType;
@@ -196,12 +200,27 @@ namespace SGen
                 if (o.CollisionTests) Objects.ForEach(s => o.CollisionTest(s));
                 if (o.TriggerDistance > 0) o.TriggerTest();
             });
+            //Добавление в список объектов спула созданных в момент обработки
+            if (Spool.Count > 0)
+            {
+                Spool.ForEach(o => Objects.Add(o));
+                Spool.Clear();
+            }
             //Уничтожение всех вылетевших за предел экрана или уничтоженных объектов
             Objects.RemoveAll(o => o.Out() | o.Destroyed);
             //Обработка пассивной анимации карты
             foreach (MapAnimation anim in MapAnimation.List) anim.Update();
             //Анимация тряски и фантомных слоёв
             Screen.GlobalUpdate();
+        }
+
+        /// <summary>
+        /// Добавление объекта в очередь на создание
+        /// </summary>
+        /// <param name="newobject"></param>
+        public static void NewObject(Box newobject)
+        {
+            Spool.Add(newobject);
         }
 
         /// <summary>

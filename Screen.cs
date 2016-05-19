@@ -327,7 +327,8 @@ namespace SGen
         {
             graphics.Viewport = viewport;
             spriteBatch.Begin();
-            spriteBatch.Draw(World.Background, new Rectangle(BackShiftX, BackShiftY, Width, Height),
+            if (World.Background != null)
+                spriteBatch.Draw(World.Background, new Rectangle(BackShiftX, BackShiftY, Width, Height),
                 new Rectangle(0, 0, World.Background.Width, World.Background.Height), Color.White);
             //Рисование задних фонов
             Draw(DrawMode.Back);
