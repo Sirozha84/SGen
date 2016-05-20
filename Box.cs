@@ -172,16 +172,16 @@ namespace SGen
         #endregion
 
         /// <summary>
-        /// Конструктор аморфного объекта, не имеющего параметров кроме координаты
+        /// Конструктор аморфного объекта, с размерами тайла
         /// </summary>
         /// <param name = "x">X-координата</param>
         /// <param name = "y">Y-координата</param>
         public Box(int x, int y)
         {
             Position = new Vector2(x, y);
-            //Остальное и не надо
-            Width = 0;
-            Height = 0;
+            //Остальное по умолчанию
+            Width = Screen.TileSize;
+            Height = Screen.TileSize;
             SpaceSide = 0;
             SpaceTop = 0;
             CollisionTests = false;
@@ -191,6 +191,30 @@ namespace SGen
             Rebound = 0;
             TriggerDistance = 0;
         }
+
+        /// <summary>
+        /// Конструктор аморфного объекта, с выборочным размером
+        /// </summary>
+        /// <param name = "x">X-координата</param>
+        /// <param name = "y">Y-координата</param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        public Box(int x, int y, int width, int height)
+        {
+            Position = new Vector2(x, y);
+            Width = width;
+            Height = height;
+            //Остальное по умолчанию
+            SpaceSide = 0;
+            SpaceTop = 0;
+            CollisionTests = false;
+            Hard = false;
+            DownIntoPlatform = false;
+            Weight = 0;
+            Rebound = 0;
+            TriggerDistance = 0;
+        }
+
         /// <summary>
         /// Конструктор игрового объекта, не имеющего веса и проверку на столкновения
         /// </summary>
@@ -209,7 +233,7 @@ namespace SGen
             SpaceSide = side;
             SpaceTop = top;
             CollisionTests = collision;
-            //Остальные задаются в продвинутом конструкторе, здесь же выставляются дефолтные
+            //Остальное по умолчанию
             Hard = false;
             DownIntoPlatform = false;
             Weight = 0;
@@ -241,7 +265,6 @@ namespace SGen
             SpaceSide = side;
             SpaceTop = top;
             CollisionTests = collision;
-            //Продвинутые переменные
             Hard = hard;
             DownIntoPlatform = downIntoPlatform;
             Weight = weight;
@@ -260,16 +283,17 @@ namespace SGen
         /// <summary>
         /// Рисование главного спрайта
         /// </summary>
-        /// <param name = "spritebatch">SpriteBatch</param>
         /// <param name = "texture">Текстура</param>
-        /// <param name = "numAn">Номер анимации</param>
-        /// <param name = "numKd">Номер кадра</param>
-        /// <param name = "pos">Направление (+1 - вправо, -1 - влево)</param>
         public void Draw(Texture2D texture) //(Texture2D texture, int numAn, int numKd, int pos, Screen screen)
         {
             Draw(texture, Color.White);
         }
 
+        /// <summary>
+        /// Рисование главного спрайта с указанным цветом
+        /// </summary>
+        /// <param name = "texture">Текстура</param>
+        /// <param name="col">Цвет</param>
         public void Draw(Texture2D texture, Color col)
         {
             SpriteEffects effect = SpriteEffects.None;
