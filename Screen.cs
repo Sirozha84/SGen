@@ -16,6 +16,10 @@ namespace SGen
         /// Режим рисования мира
         /// </summary>
         public enum DrawMode { All, Back, Front };
+        /// <summary>
+        /// Скорость наведения камеры. 0.02F - ускорение по умолчанию
+        /// </summary>
+        public static float SpeedHoming = 0.02f;
         #endregion
 
         #region Константы экрана, задающиеся при старте игры
@@ -211,7 +215,7 @@ namespace SGen
         /// </summary>
         public void Update()
         {
-            Update(TrackingObject.Center(), 0.02f);
+            Update(TrackingObject.Center(), SpeedHoming);
         }
 
         /// <summary>
@@ -220,14 +224,14 @@ namespace SGen
         /// <param name="position">Точка слежения камеры</param>
         public void Update(Vector2 position)
         {
-            Update(position, 0.02f);
+            Update(position, SpeedHoming);
         }
 
         /// <summary>
         /// Движение камеры к указанной точке с указанным ускорением
         /// </summary>
         /// <param name="position">Точка слежения камеры</param>
-        /// <param name="a">Ускорение движения, 0.02F - ускорение по умолчанию.</param>
+        /// <param name="a">Скорость наведения. 0.02F - ускорение по умолчанию.</param>
         public void Update(Vector2 position, float a)
         {
             //Движем камеру к точке

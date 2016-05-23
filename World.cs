@@ -179,12 +179,7 @@ namespace SGen
                     if (M[0, i, j] > 0)
                     {
                         AddObject(M[0, i, j], i * Screen.TileSize, j * Screen.TileSize);
-                        //Box o = AddObject(M[0, i, j], i * Screen.TileSize, j * Screen.TileSize);
-                        /*if (o != null)
-                        {
-                            Objects.Add(o);
-                            if (o.GetType() == PlayerType) Players.Add(o);
-                        }*/
+                        //M[0, i, j] = 0;
                     }
         }
 

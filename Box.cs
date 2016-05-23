@@ -60,7 +60,7 @@ namespace SGen
         /// <summary>
         /// Упирается ли объект в стены
         /// </summary>
-        bool Hard;
+        public bool Hard;
         /// <summary>
         /// Может ли объект стоять на платформах
         /// </summary>
@@ -137,6 +137,10 @@ namespace SGen
         /// Направление (больше 0 - вправо, меньше 0 - влево)
         /// </summary>
         protected int AnimationSide = 0;
+        /// <summary>
+        /// Рисование объекта вверх ногами
+        /// </summary>
+        protected bool UpsideDown = false;
         /// <summary>
         /// Падаем?
         /// </summary>
@@ -236,7 +240,7 @@ namespace SGen
             //Остальное по умолчанию
             Hard = false;
             DownIntoPlatform = false;
-            Weight = 0;
+            Weight = 1;
             Rebound = 0;
             TriggerDistance = 0;
         }
@@ -298,6 +302,7 @@ namespace SGen
         {
             SpriteEffects effect = SpriteEffects.None;
             if (AnimationSide < 0) effect = SpriteEffects.FlipHorizontally;
+            if (UpsideDown) effect = SpriteEffects.FlipVertically;
             spriteBatch.Draw(texture,
                 new Rectangle(
                     (int)(Position.X / Screen.PixelSize) * Screen.PixelSize - (int)(screen.Camera.X / Screen.PixelSize) * Screen.PixelSize,
@@ -666,8 +671,8 @@ namespace SGen
             //Сделать проверку на то что точка в матрице
             x = (x + (int)Position.X) / Screen.TileSize;
             y = (y + (int)Position.Y) / Screen.TileSize;
-            if (InMatrix(x, y)) 
-                return World.M[0, x , y];
+            if (InMatrix(x, y))
+                return World.M[0, x, y];
             else
                 return 0;
         }
