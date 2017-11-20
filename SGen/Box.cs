@@ -148,7 +148,7 @@ namespace SGen
         /// <summary>
         /// Рандомайзер
         /// </summary>
-        protected static Random RND = new Random();
+        public static Random RND = new Random();
         #endregion
 
         #region Абстрактные методы
@@ -257,11 +257,11 @@ namespace SGen
         /// <param name = "collision">Реагирует ли объект на прикосновения других</param>
         /// <param name = "hard">Проверять ли на столкновения</param>
         /// <param name = "weight">Вес объекта, 0 - если невесомый</param>
-        /// <param name = "downIntoPlatform">Проходит ли вниз через платформы</param>
+        /// <param name = "Platforms">Взаимодействие с платформами</param>
         /// <param name = "rebound">Коэффициент отскока от 0 до 1</param>
         /// <param name = "triggerDistance">Дистанция триггера. 0 - объект не реагирует на приближения</param>
         public Box(int x, int y, int width, int height, int side, int top, bool collision,
-            bool hard, bool downIntoPlatform, float weight, float rebound, int triggerDistance)
+            bool hard, bool Platforms, float weight, float rebound, int triggerDistance)
         {
             Position = new Vector2(x, y);
             Width = width;
@@ -270,7 +270,7 @@ namespace SGen
             SpaceTop = top;
             CollisionTests = collision;
             Hard = hard;
-            DownIntoPlatform = downIntoPlatform;
+            DownIntoPlatform = Platforms;
             Weight = weight;
             Rebound = rebound;
             TriggerDistance = triggerDistance;

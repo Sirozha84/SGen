@@ -27,11 +27,11 @@ namespace SGen
         /// <summary>
         /// Ширина экрана в пикселях
         /// </summary>
-        static int Width;
+        public static int Width;
         /// <summary>
         /// Высота экрана в пикселях
         /// </summary>
-        static int Height;
+        public static int Height;
         /// <summary>
         /// Размер тайла
         /// </summary>
